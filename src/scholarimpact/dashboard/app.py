@@ -96,6 +96,18 @@ class Dashboard:
             port: Port to run dashboard on (optional, uses instance port)
             debug: Enable debug mode
         """
+        # Check if we're already running in Streamlit context
+        try:
+            import streamlit as st
+            # If we can access Streamlit's runtime, we're already in a Streamlit app
+            if hasattr(st, 'runtime') and st.runtime.exists():
+                # Just render directly, no subprocess needed
+                self.render_app()
+                return
+        except:
+            # Not in Streamlit context or error checking, proceed with subprocess
+            pass
+
         if port is None:
             port = self.port
 
