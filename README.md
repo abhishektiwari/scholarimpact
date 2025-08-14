@@ -132,7 +132,7 @@ git push -u origin main
 
 Your repository should contain:
 ```
-streamlit-app/
+my-research-dashboard/
 ├── app.py                    # Main dashboard file
 ├── requirements.txt          # Python dependencies
 ├── .streamlit/

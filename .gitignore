@@ -203,7 +203,11 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Custom additions
-test
+example-dashboard
+my-research-dashboard
 .DS_Store
 .claude
 data
+
+# setuptools-scm generated version file
+src/scholarimpact/_version.py

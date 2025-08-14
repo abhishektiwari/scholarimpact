@@ -1,0 +1,19 @@
+# Include base requirements
+-r requirements.txt
+
+# Development dependencies
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-benchmark>=4.0.0
+
+# Code formatting and linting
+black>=22.0.0
+isort>=5.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+
+# Build tools
+build>=0.8.0
+twine>=4.0.0
+setuptools-scm>=6.2.0
