@@ -3,9 +3,9 @@ A bibliometric tool to analyse, visualise, and share your research impact, outpu
 
 For each article under your Google Scholar Profile, **_ScholarImpact_**: (1) total number of citations, (2) number of unique authors who have cited the article, (3) number of countries from which citations originate, (4) number of institutions from which citations originate, (5) geographic distribution of citations, (6) citation trends over time, (7) research domain analysis, (8) interdisciplinary impact Metrics including Patents and Wikipedia mentions.
 
-![Example Dashboard](example-dashboard.png)
+![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/example-dashboard.png)
 
-![Research Domains Analysis](research-domains.png)
+![Research Domains Analysis](https://static.abhishek-tiwari.com/scholarimpact/research-domains.png)
 
 ## Workflow Overview
 This workflow extracts author data from your Google Scholar profile, then crawls citations for each article under your Google Scholar profile. Next workflow enriches them with information using Google Scholar profiles of citing authors and OpenAlex APIs. Finally, output data is used to present your impact of your research with geographic and institutional insights.

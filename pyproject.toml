@@ -78,8 +78,7 @@ scholarimpact = [
     "assets/**/*.woff",
     "assets/**/*.woff2",
     "assets/**/*.txt",
-    "assets/**/*.md",
-    "*.png"
+    "assets/**/*.md"
 ]
 
 [tool.setuptools_scm]
