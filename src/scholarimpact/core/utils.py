@@ -10,432 +10,408 @@ some generic TLDs with strong country associations.
 # Country-code Top Level Domains (ccTLDs) mapping
 TLD_COUNTRY_MAPPING = {
     # A
-    '.ad': 'Andorra',
-    '.ae': 'United Arab Emirates',
-    '.af': 'Afghanistan',
-    '.ag': 'Antigua and Barbuda',
-    '.ai': 'Anguilla',
-    '.al': 'Albania',
-    '.am': 'Armenia',
-    '.ao': 'Angola',
-    '.aq': 'Antarctica',
-    '.ar': 'Argentina',
-    '.as': 'American Samoa',
-    '.at': 'Austria',
-    '.au': 'Australia',
-    '.aw': 'Aruba',
-    '.ax': 'Åland Islands',
-    '.az': 'Azerbaijan',
-    
+    ".ad": "Andorra",
+    ".ae": "United Arab Emirates",
+    ".af": "Afghanistan",
+    ".ag": "Antigua and Barbuda",
+    ".ai": "Anguilla",
+    ".al": "Albania",
+    ".am": "Armenia",
+    ".ao": "Angola",
+    ".aq": "Antarctica",
+    ".ar": "Argentina",
+    ".as": "American Samoa",
+    ".at": "Austria",
+    ".au": "Australia",
+    ".aw": "Aruba",
+    ".ax": "Åland Islands",
+    ".az": "Azerbaijan",
     # B
-    '.ba': 'Bosnia and Herzegovina',
-    '.bb': 'Barbados',
-    '.bd': 'Bangladesh',
-    '.be': 'Belgium',
-    '.bf': 'Burkina Faso',
-    '.bg': 'Bulgaria',
-    '.bh': 'Bahrain',
-    '.bi': 'Burundi',
-    '.bj': 'Benin',
-    '.bl': 'Saint Barthélemy',
-    '.bm': 'Bermuda',
-    '.bn': 'Brunei',
-    '.bo': 'Bolivia',
-    '.bq': 'Caribbean Netherlands',
-    '.br': 'Brazil',
-    '.bs': 'Bahamas',
-    '.bt': 'Bhutan',
-    '.bv': 'Bouvet Island',
-    '.bw': 'Botswana',
-    '.by': 'Belarus',
-    '.bz': 'Belize',
-    
+    ".ba": "Bosnia and Herzegovina",
+    ".bb": "Barbados",
+    ".bd": "Bangladesh",
+    ".be": "Belgium",
+    ".bf": "Burkina Faso",
+    ".bg": "Bulgaria",
+    ".bh": "Bahrain",
+    ".bi": "Burundi",
+    ".bj": "Benin",
+    ".bl": "Saint Barthélemy",
+    ".bm": "Bermuda",
+    ".bn": "Brunei",
+    ".bo": "Bolivia",
+    ".bq": "Caribbean Netherlands",
+    ".br": "Brazil",
+    ".bs": "Bahamas",
+    ".bt": "Bhutan",
+    ".bv": "Bouvet Island",
+    ".bw": "Botswana",
+    ".by": "Belarus",
+    ".bz": "Belize",
     # C
-    '.ca': 'Canada',
-    '.cc': 'Cocos (Keeling) Islands',
-    '.cd': 'Democratic Republic of the Congo',
-    '.cf': 'Central African Republic',
-    '.cg': 'Congo Republic',
-    '.ch': 'Switzerland',
-    '.ci': 'Côte d\'Ivoire',
-    '.ck': 'Cook Islands',
-    '.cl': 'Chile',
-    '.cm': 'Cameroon',
-    '.cn': 'China',
-    '.co': 'Colombia',
-    '.cr': 'Costa Rica',
-    '.cu': 'Cuba',
-    '.cv': 'Cape Verde',
-    '.cw': 'Curaçao',
-    '.cx': 'Christmas Island',
-    '.cy': 'Cyprus',
-    '.cz': 'Czech Republic',
-    
+    ".ca": "Canada",
+    ".cc": "Cocos (Keeling) Islands",
+    ".cd": "Democratic Republic of the Congo",
+    ".cf": "Central African Republic",
+    ".cg": "Congo Republic",
+    ".ch": "Switzerland",
+    ".ci": "Côte d'Ivoire",
+    ".ck": "Cook Islands",
+    ".cl": "Chile",
+    ".cm": "Cameroon",
+    ".cn": "China",
+    ".co": "Colombia",
+    ".cr": "Costa Rica",
+    ".cu": "Cuba",
+    ".cv": "Cape Verde",
+    ".cw": "Curaçao",
+    ".cx": "Christmas Island",
+    ".cy": "Cyprus",
+    ".cz": "Czech Republic",
     # D
-    '.de': 'Germany',
-    '.dj': 'Djibouti',
-    '.dk': 'Denmark',
-    '.dm': 'Dominica',
-    '.do': 'Dominican Republic',
-    '.dz': 'Algeria',
-    
+    ".de": "Germany",
+    ".dj": "Djibouti",
+    ".dk": "Denmark",
+    ".dm": "Dominica",
+    ".do": "Dominican Republic",
+    ".dz": "Algeria",
     # E
-    '.ec': 'Ecuador',
-    '.ee': 'Estonia',
-    '.eg': 'Egypt',
-    '.eh': 'Western Sahara',
-    '.er': 'Eritrea',
-    '.es': 'Spain',
-    '.et': 'Ethiopia',
-    '.eu': 'European Union',  # Special case
-    
+    ".ec": "Ecuador",
+    ".ee": "Estonia",
+    ".eg": "Egypt",
+    ".eh": "Western Sahara",
+    ".er": "Eritrea",
+    ".es": "Spain",
+    ".et": "Ethiopia",
+    ".eu": "European Union",  # Special case
     # F
-    '.fi': 'Finland',
-    '.fj': 'Fiji',
-    '.fk': 'Falkland Islands',
-    '.fm': 'Micronesia',
-    '.fo': 'Faroe Islands',
-    '.fr': 'France',
-    
+    ".fi": "Finland",
+    ".fj": "Fiji",
+    ".fk": "Falkland Islands",
+    ".fm": "Micronesia",
+    ".fo": "Faroe Islands",
+    ".fr": "France",
     # G
-    '.ga': 'Gabon',
-    '.gb': 'United Kingdom',
-    '.gd': 'Grenada',
-    '.ge': 'Georgia',
-    '.gf': 'French Guiana',
-    '.gg': 'Guernsey',
-    '.gh': 'Ghana',
-    '.gi': 'Gibraltar',
-    '.gl': 'Greenland',
-    '.gm': 'Gambia',
-    '.gn': 'Guinea',
-    '.gp': 'Guadeloupe',
-    '.gq': 'Equatorial Guinea',
-    '.gr': 'Greece',
-    '.gs': 'South Georgia and the South Sandwich Islands',
-    '.gt': 'Guatemala',
-    '.gu': 'Guam',
-    '.gw': 'Guinea-Bissau',
-    '.gy': 'Guyana',
-    
+    ".ga": "Gabon",
+    ".gb": "United Kingdom",
+    ".gd": "Grenada",
+    ".ge": "Georgia",
+    ".gf": "French Guiana",
+    ".gg": "Guernsey",
+    ".gh": "Ghana",
+    ".gi": "Gibraltar",
+    ".gl": "Greenland",
+    ".gm": "Gambia",
+    ".gn": "Guinea",
+    ".gp": "Guadeloupe",
+    ".gq": "Equatorial Guinea",
+    ".gr": "Greece",
+    ".gs": "South Georgia and the South Sandwich Islands",
+    ".gt": "Guatemala",
+    ".gu": "Guam",
+    ".gw": "Guinea-Bissau",
+    ".gy": "Guyana",
     # H
-    '.hk': 'Hong Kong',
-    '.hm': 'Heard Island and McDonald Islands',
-    '.hn': 'Honduras',
-    '.hr': 'Croatia',
-    '.ht': 'Haiti',
-    '.hu': 'Hungary',
-    
+    ".hk": "Hong Kong",
+    ".hm": "Heard Island and McDonald Islands",
+    ".hn": "Honduras",
+    ".hr": "Croatia",
+    ".ht": "Haiti",
+    ".hu": "Hungary",
     # I
-    '.id': 'Indonesia',
-    '.ie': 'Ireland',
-    '.il': 'Israel',
-    '.im': 'Isle of Man',
-    '.in': 'India',
-    '.io': 'British Indian Ocean Territory',
-    '.iq': 'Iraq',
-    '.ir': 'Iran',
-    '.is': 'Iceland',
-    '.it': 'Italy',
-    
+    ".id": "Indonesia",
+    ".ie": "Ireland",
+    ".il": "Israel",
+    ".im": "Isle of Man",
+    ".in": "India",
+    ".io": "British Indian Ocean Territory",
+    ".iq": "Iraq",
+    ".ir": "Iran",
+    ".is": "Iceland",
+    ".it": "Italy",
     # J
-    '.je': 'Jersey',
-    '.jm': 'Jamaica',
-    '.jo': 'Jordan',
-    '.jp': 'Japan',
-    
+    ".je": "Jersey",
+    ".jm": "Jamaica",
+    ".jo": "Jordan",
+    ".jp": "Japan",
     # K
-    '.ke': 'Kenya',
-    '.kg': 'Kyrgyzstan',
-    '.kh': 'Cambodia',
-    '.ki': 'Kiribati',
-    '.km': 'Comoros',
-    '.kn': 'Saint Kitts and Nevis',
-    '.kp': 'North Korea',
-    '.kr': 'South Korea',
-    '.kw': 'Kuwait',
-    '.ky': 'Cayman Islands',
-    '.kz': 'Kazakhstan',
-    
+    ".ke": "Kenya",
+    ".kg": "Kyrgyzstan",
+    ".kh": "Cambodia",
+    ".ki": "Kiribati",
+    ".km": "Comoros",
+    ".kn": "Saint Kitts and Nevis",
+    ".kp": "North Korea",
+    ".kr": "South Korea",
+    ".kw": "Kuwait",
+    ".ky": "Cayman Islands",
+    ".kz": "Kazakhstan",
     # L
-    '.la': 'Laos',
-    '.lb': 'Lebanon',
-    '.lc': 'Saint Lucia',
-    '.li': 'Liechtenstein',
-    '.lk': 'Sri Lanka',
-    '.lr': 'Liberia',
-    '.ls': 'Lesotho',
-    '.lt': 'Lithuania',
-    '.lu': 'Luxembourg',
-    '.lv': 'Latvia',
-    '.ly': 'Libya',
-    
+    ".la": "Laos",
+    ".lb": "Lebanon",
+    ".lc": "Saint Lucia",
+    ".li": "Liechtenstein",
+    ".lk": "Sri Lanka",
+    ".lr": "Liberia",
+    ".ls": "Lesotho",
+    ".lt": "Lithuania",
+    ".lu": "Luxembourg",
+    ".lv": "Latvia",
+    ".ly": "Libya",
     # M
-    '.ma': 'Morocco',
-    '.mc': 'Monaco',
-    '.md': 'Moldova',
-    '.me': 'Montenegro',
-    '.mf': 'Saint Martin',
-    '.mg': 'Madagascar',
-    '.mh': 'Marshall Islands',
-    '.mk': 'North Macedonia',
-    '.ml': 'Mali',
-    '.mm': 'Myanmar',
-    '.mn': 'Mongolia',
-    '.mo': 'Macao',
-    '.mp': 'Northern Mariana Islands',
-    '.mq': 'Martinique',
-    '.mr': 'Mauritania',
-    '.ms': 'Montserrat',
-    '.mt': 'Malta',
-    '.mu': 'Mauritius',
-    '.mv': 'Maldives',
-    '.mw': 'Malawi',
-    '.mx': 'Mexico',
-    '.my': 'Malaysia',
-    '.mz': 'Mozambique',
-    
+    ".ma": "Morocco",
+    ".mc": "Monaco",
+    ".md": "Moldova",
+    ".me": "Montenegro",
+    ".mf": "Saint Martin",
+    ".mg": "Madagascar",
+    ".mh": "Marshall Islands",
+    ".mk": "North Macedonia",
+    ".ml": "Mali",
+    ".mm": "Myanmar",
+    ".mn": "Mongolia",
+    ".mo": "Macao",
+    ".mp": "Northern Mariana Islands",
+    ".mq": "Martinique",
+    ".mr": "Mauritania",
+    ".ms": "Montserrat",
+    ".mt": "Malta",
+    ".mu": "Mauritius",
+    ".mv": "Maldives",
+    ".mw": "Malawi",
+    ".mx": "Mexico",
+    ".my": "Malaysia",
+    ".mz": "Mozambique",
     # N
-    '.na': 'Namibia',
-    '.nc': 'New Caledonia',
-    '.ne': 'Niger',
-    '.nf': 'Norfolk Island',
-    '.ng': 'Nigeria',
-    '.ni': 'Nicaragua',
-    '.nl': 'Netherlands',
-    '.no': 'Norway',
-    '.np': 'Nepal',
-    '.nr': 'Nauru',
-    '.nu': 'Niue',
-    '.nz': 'New Zealand',
-    
+    ".na": "Namibia",
+    ".nc": "New Caledonia",
+    ".ne": "Niger",
+    ".nf": "Norfolk Island",
+    ".ng": "Nigeria",
+    ".ni": "Nicaragua",
+    ".nl": "Netherlands",
+    ".no": "Norway",
+    ".np": "Nepal",
+    ".nr": "Nauru",
+    ".nu": "Niue",
+    ".nz": "New Zealand",
     # O
-    '.om': 'Oman',
-    
+    ".om": "Oman",
     # P
-    '.pa': 'Panama',
-    '.pe': 'Peru',
-    '.pf': 'French Polynesia',
-    '.pg': 'Papua New Guinea',
-    '.ph': 'Philippines',
-    '.pk': 'Pakistan',
-    '.pl': 'Poland',
-    '.pm': 'Saint Pierre and Miquelon',
-    '.pn': 'Pitcairn',
-    '.pr': 'Puerto Rico',
-    '.ps': 'Palestine',
-    '.pt': 'Portugal',
-    '.pw': 'Palau',
-    '.py': 'Paraguay',
-    
+    ".pa": "Panama",
+    ".pe": "Peru",
+    ".pf": "French Polynesia",
+    ".pg": "Papua New Guinea",
+    ".ph": "Philippines",
+    ".pk": "Pakistan",
+    ".pl": "Poland",
+    ".pm": "Saint Pierre and Miquelon",
+    ".pn": "Pitcairn",
+    ".pr": "Puerto Rico",
+    ".ps": "Palestine",
+    ".pt": "Portugal",
+    ".pw": "Palau",
+    ".py": "Paraguay",
     # Q
-    '.qa': 'Qatar',
-    
+    ".qa": "Qatar",
     # R
-    '.re': 'Réunion',
-    '.ro': 'Romania',
-    '.rs': 'Serbia',
-    '.ru': 'Russia',
-    '.rw': 'Rwanda',
-    
+    ".re": "Réunion",
+    ".ro": "Romania",
+    ".rs": "Serbia",
+    ".ru": "Russia",
+    ".rw": "Rwanda",
     # S
-    '.sa': 'Saudi Arabia',
-    '.sb': 'Solomon Islands',
-    '.sc': 'Seychelles',
-    '.sd': 'Sudan',
-    '.se': 'Sweden',
-    '.sg': 'Singapore',
-    '.sh': 'Saint Helena',
-    '.si': 'Slovenia',
-    '.sj': 'Svalbard and Jan Mayen',
-    '.sk': 'Slovakia',
-    '.sl': 'Sierra Leone',
-    '.sm': 'San Marino',
-    '.sn': 'Senegal',
-    '.so': 'Somalia',
-    '.sr': 'Suriname',
-    '.ss': 'South Sudan',
-    '.st': 'Sao Tome and Principe',
-    '.su': 'Soviet Union',  # Deprecated but still used
-    '.sv': 'El Salvador',
-    '.sx': 'Sint Maarten',
-    '.sy': 'Syria',
-    '.sz': 'Eswatini',
-    
+    ".sa": "Saudi Arabia",
+    ".sb": "Solomon Islands",
+    ".sc": "Seychelles",
+    ".sd": "Sudan",
+    ".se": "Sweden",
+    ".sg": "Singapore",
+    ".sh": "Saint Helena",
+    ".si": "Slovenia",
+    ".sj": "Svalbard and Jan Mayen",
+    ".sk": "Slovakia",
+    ".sl": "Sierra Leone",
+    ".sm": "San Marino",
+    ".sn": "Senegal",
+    ".so": "Somalia",
+    ".sr": "Suriname",
+    ".ss": "South Sudan",
+    ".st": "Sao Tome and Principe",
+    ".su": "Soviet Union",  # Deprecated but still used
+    ".sv": "El Salvador",
+    ".sx": "Sint Maarten",
+    ".sy": "Syria",
+    ".sz": "Eswatini",
     # T
-    '.tc': 'Turks and Caicos Islands',
-    '.td': 'Chad',
-    '.tf': 'French Southern Territories',
-    '.tg': 'Togo',
-    '.th': 'Thailand',
-    '.tj': 'Tajikistan',
-    '.tk': 'Tokelau',
-    '.tl': 'Timor-Leste',
-    '.tm': 'Turkmenistan',
-    '.tn': 'Tunisia',
-    '.to': 'Tonga',
-    '.tr': 'Turkey',
-    '.tt': 'Trinidad and Tobago',
-    '.tv': 'Tuvalu',
-    '.tw': 'Taiwan',
-    '.tz': 'Tanzania',
-    
+    ".tc": "Turks and Caicos Islands",
+    ".td": "Chad",
+    ".tf": "French Southern Territories",
+    ".tg": "Togo",
+    ".th": "Thailand",
+    ".tj": "Tajikistan",
+    ".tk": "Tokelau",
+    ".tl": "Timor-Leste",
+    ".tm": "Turkmenistan",
+    ".tn": "Tunisia",
+    ".to": "Tonga",
+    ".tr": "Turkey",
+    ".tt": "Trinidad and Tobago",
+    ".tv": "Tuvalu",
+    ".tw": "Taiwan",
+    ".tz": "Tanzania",
     # U
-    '.ua': 'Ukraine',
-    '.ug': 'Uganda',
-    '.uk': 'United Kingdom',
-    '.um': 'United States Minor Outlying Islands',
-    '.us': 'United States',
-    '.uy': 'Uruguay',
-    '.uz': 'Uzbekistan',
-    
+    ".ua": "Ukraine",
+    ".ug": "Uganda",
+    ".uk": "United Kingdom",
+    ".um": "United States Minor Outlying Islands",
+    ".us": "United States",
+    ".uy": "Uruguay",
+    ".uz": "Uzbekistan",
     # V
-    '.va': 'Vatican City',
-    '.vc': 'Saint Vincent and the Grenadines',
-    '.ve': 'Venezuela',
-    '.vg': 'British Virgin Islands',
-    '.vi': 'United States Virgin Islands',
-    '.vn': 'Vietnam',
-    '.vu': 'Vanuatu',
-    
+    ".va": "Vatican City",
+    ".vc": "Saint Vincent and the Grenadines",
+    ".ve": "Venezuela",
+    ".vg": "British Virgin Islands",
+    ".vi": "United States Virgin Islands",
+    ".vn": "Vietnam",
+    ".vu": "Vanuatu",
     # W
-    '.wf': 'Wallis and Futuna',
-    '.ws': 'Samoa',
-    
+    ".wf": "Wallis and Futuna",
+    ".ws": "Samoa",
     # Y
-    '.ye': 'Yemen',
-    '.yt': 'Mayotte',
-    
+    ".ye": "Yemen",
+    ".yt": "Mayotte",
     # Z
-    '.za': 'South Africa',
-    '.zm': 'Zambia',
-    '.zw': 'Zimbabwe',
-    
+    ".za": "South Africa",
+    ".zm": "Zambia",
+    ".zw": "Zimbabwe",
     # Generic TLDs with strong country associations
-    '.edu': 'United States',  # Primarily used by US educational institutions
-    '.gov': 'United States',  # US government
-    '.mil': 'United States',  # US military
+    ".edu": "United States",  # Primarily used by US educational institutions
+    ".gov": "United States",  # US government
+    ".mil": "United States",  # US military
 }
+
 
 def get_country_from_tld(domain):
     """
     Extract country from domain using TLD mapping.
-    
+
     Args:
         domain: Domain name (e.g., 'example.com', 'university.edu')
-        
+
     Returns:
         Country name or None if not found
     """
     if not domain:
         return None
-    
+
     domain = domain.lower().strip()
-    
+
     # Remove protocol and www prefix if present
-    if '://' in domain:
-        domain = domain.split('://')[-1]
-    if domain.startswith('www.'):
+    if "://" in domain:
+        domain = domain.split("://")[-1]
+    if domain.startswith("www."):
         domain = domain[4:]
-    
+
     # Extract TLD (everything from the last dot)
-    if '.' not in domain:
+    if "." not in domain:
         return None
-    
-    parts = domain.split('.')
-    
+
+    parts = domain.split(".")
+
     # Try different TLD combinations (for cases like .co.uk, .edu.au, etc.)
     for i in range(len(parts)):
-        tld_candidate = '.' + '.'.join(parts[i:])
+        tld_candidate = "." + ".".join(parts[i:])
         if tld_candidate in TLD_COUNTRY_MAPPING:
             return TLD_COUNTRY_MAPPING[tld_candidate]
-    
+
     return None
 
 
 def get_country_code_from_tld(domain):
     """
     Extract ISO country code from domain using TLD mapping and pycountry.
-    
+
     Args:
         domain: Domain name (e.g., 'example.com', 'university.edu.au')
-        
+
     Returns:
         ISO country code (e.g., 'US', 'GB', 'AU') or None if not found
     """
     if not domain:
         return None
-    
+
     try:
         import pycountry
     except ImportError:
         # Fallback to basic manual mapping if pycountry not available
         return None
-    
+
     # First get the country name
     country_name = get_country_from_tld(domain)
     if not country_name:
         return None
-    
+
     try:
         # Use pycountry to find the ISO code
         # Handle common variations and edge cases
         country_name_variants = [
             country_name,
-            country_name.replace(' ', ''),  # Remove spaces
-            country_name.replace('-', ' '),  # Replace hyphens with spaces
+            country_name.replace(" ", ""),  # Remove spaces
+            country_name.replace("-", " "),  # Replace hyphens with spaces
         ]
-        
+
         # Special case mappings for names that don't match pycountry exactly
         special_cases = {
-            'United States': 'US',
-            'United Kingdom': 'GB', 
-            'Great Britain': 'GB',
-            'England': 'GB',
-            'Scotland': 'GB',
-            'Wales': 'GB',
-            'Northern Ireland': 'GB',
-            'South Korea': 'KR',
-            'North Korea': 'KP',
-            'East Timor': 'TL',
-            'Timor-Leste': 'TL',
-            'Czech Republic': 'CZ',
-            'Czechia': 'CZ',
-            'Slovak Republic': 'SK',
-            'Slovakia': 'SK',
-            'Bosnia and Herzegovina': 'BA',
-            'North Macedonia': 'MK',
-            'Macedonia': 'MK',
-            'Republic of Macedonia': 'MK',
-            'Hong Kong': 'HK',
-            'Macao': 'MO',
-            'Macau': 'MO',
-            'Taiwan': 'TW',
-            'Palestine': 'PS',
-            'Kosovo': 'XK',
-            'Russia': 'RU',
-            'Russian Federation': 'RU',
-            'Iran': 'IR',
-            'Syria': 'SY',
-            'Venezuela': 'VE',
-            'Bolivia': 'BO',
-            'South Sudan': 'SS',
-            'Myanmar': 'MM',
-            'Burma': 'MM',
-            'Ivory Coast': 'CI',
-            "Côte d'Ivoire": 'CI',
-            'Democratic Republic of the Congo': 'CD',
-            'Republic of the Congo': 'CG',
-            'Congo': 'CG',
-            'Eswatini': 'SZ',
-            'Swaziland': 'SZ'
+            "United States": "US",
+            "United Kingdom": "GB",
+            "Great Britain": "GB",
+            "England": "GB",
+            "Scotland": "GB",
+            "Wales": "GB",
+            "Northern Ireland": "GB",
+            "South Korea": "KR",
+            "North Korea": "KP",
+            "East Timor": "TL",
+            "Timor-Leste": "TL",
+            "Czech Republic": "CZ",
+            "Czechia": "CZ",
+            "Slovak Republic": "SK",
+            "Slovakia": "SK",
+            "Bosnia and Herzegovina": "BA",
+            "North Macedonia": "MK",
+            "Macedonia": "MK",
+            "Republic of Macedonia": "MK",
+            "Hong Kong": "HK",
+            "Macao": "MO",
+            "Macau": "MO",
+            "Taiwan": "TW",
+            "Palestine": "PS",
+            "Kosovo": "XK",
+            "Russia": "RU",
+            "Russian Federation": "RU",
+            "Iran": "IR",
+            "Syria": "SY",
+            "Venezuela": "VE",
+            "Bolivia": "BO",
+            "South Sudan": "SS",
+            "Myanmar": "MM",
+            "Burma": "MM",
+            "Ivory Coast": "CI",
+            "Côte d'Ivoire": "CI",
+            "Democratic Republic of the Congo": "CD",
+            "Republic of the Congo": "CG",
+            "Congo": "CG",
+            "Eswatini": "SZ",
+            "Swaziland": "SZ",
         }
-        
+
         # Check special cases first
         for variant in country_name_variants:
             if variant in special_cases:
                 return special_cases[variant]
-        
+
         # Try fuzzy search with pycountry
         for variant in country_name_variants:
             try:
@@ -444,10 +420,10 @@ def get_country_code_from_tld(domain):
                     return countries[0].alpha_2
             except LookupError:
                 continue
-        
+
         # If no match found, return None
         return None
-        
+
     except Exception as e:
         # If pycountry fails, return None
         return None

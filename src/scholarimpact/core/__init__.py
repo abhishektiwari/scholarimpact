@@ -3,4 +3,4 @@
 from .crawler import CitationCrawler
 from .extractor import AuthorExtractor
 
-__all__ = ['CitationCrawler', 'AuthorExtractor']
+__all__ = ["CitationCrawler", "AuthorExtractor"]
