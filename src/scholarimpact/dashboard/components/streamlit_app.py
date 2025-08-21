@@ -967,8 +967,22 @@ class StreamlitAppComponent(BaseComponent):
             if domain_data.get("domains") and domain_data.get("fields"):
                 st.markdown("#### Interdisciplinary Impact Metrics")
 
-                # Add patent citation count
-                patent_count = self._count_patent_citations(pub_data, data_dir)
+                # Calculate patent citation count using highest value from available sources
+                patent_count_us = self._count_patent_citations(pub_data, data_dir)  # US patents
+                
+                # Get Altmetric patent count (all patents)
+                altmetric_patent_count = pub_data.get('altmetric_cited_by_patents_count')
+                if pd.isna(altmetric_patent_count):
+                    altmetric_patent_count = 0
+                else:
+                    altmetric_patent_count = int(altmetric_patent_count) if altmetric_patent_count else 0
+                
+                # Use the highest count and determine help text
+                patent_count = max(patent_count_us, altmetric_patent_count)
+                if altmetric_patent_count > patent_count_us:
+                    patent_help_text = "Number of patents citing this work (Altmetric data)"
+                else:
+                    patent_help_text = "Number of US patents citing this work"
 
                 col1, col2, col3, col4 = st.columns(4)
 
@@ -1015,12 +1029,15 @@ class StreamlitAppComponent(BaseComponent):
                     st.metric(
                         "Patent Citations",
                         patent_count,
-                        help="Number of US patents citing this work",
+                        help=patent_help_text,
                     )
         else:
             st.info(
                 "Research domain analysis requires citation data with OpenAlex primary_topic information. Re-crawl with OpenAlex enabled to see this analysis."
             )
+        
+        # Altmetric Section
+        self._render_altmetric_section(pub_data)
 
     def _get_citations_per_year(self, pub_data: pd.Series, data_dir: str) -> Dict[int, int]:
         """Get citations per year exactly as in original."""
@@ -1274,6 +1291,95 @@ class StreamlitAppComponent(BaseComponent):
         citations_table.sort(key=sort_key)
 
         return citations_table
+
+    def _render_altmetric_section(self, pub_data: pd.Series):
+        """Render Altmetric metrics section."""
+        # Check if any Altmetric data is available
+        altmetric_fields = [
+            'altmetric_cited_by_wikipedia_count',
+            'altmetric_cited_by_posts_count',
+            'altmetric_readers_count',
+            'altmetric_images',
+            'altmetric_details_url'
+        ]
+        
+        has_altmetric_data = any(field in pub_data and pub_data[field] is not None for field in altmetric_fields)
+        
+        if has_altmetric_data:
+            st.markdown("#### Altmetric Attention")
+            
+            # Create columns for metrics and badge
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                # Display metrics in sub-columns
+                metric_col1, metric_col2, metric_col3 = st.columns(3)
+                
+                with metric_col1:
+                    wikipedia_count = pub_data.get('altmetric_cited_by_wikipedia_count')
+                    # Handle NaN/None values using pandas isna
+                    if pd.isna(wikipedia_count):
+                        wikipedia_count = 0
+                    else:
+                        wikipedia_count = int(wikipedia_count) if wikipedia_count else 0
+                    st.metric(
+                        "Wikipedia Citations",
+                        wikipedia_count,
+                        help="Number of times cited in Wikipedia articles"
+                    )
+                
+                with metric_col2:
+                    posts_count = pub_data.get('altmetric_cited_by_posts_count')
+                    # Handle NaN/None values using pandas isna
+                    if pd.isna(posts_count):
+                        posts_count = 0
+                    else:
+                        posts_count = int(posts_count) if posts_count else 0
+                    st.metric(
+                        "Social Media Posts",
+                        posts_count,
+                        help="Number of social media posts mentioning this work"
+                    )
+                
+                with metric_col3:
+                    readers_count = pub_data.get('altmetric_readers_count')
+                    # Handle NaN/None values using pandas isna
+                    if pd.isna(readers_count):
+                        readers_count = 0
+                    else:
+                        readers_count = int(readers_count) if readers_count else 0
+                    st.metric(
+                        "Readers Count",
+                        readers_count,
+                        help="Total number of readers across all platforms (Mendeley, CiteULike, etc.)"
+                    )
+            
+            with col2:
+                # Display Altmetric badge with link
+                images = pub_data.get('altmetric_images')
+                details_url = pub_data.get('altmetric_details_url')
+                
+                if images and details_url:
+                    small_image = images.get('small')
+                    if small_image:
+                        # Create clickable image that opens in new tab
+                        st.markdown(
+                            f"""
+                            <a href="{details_url}" target="_blank">
+                                <img src="{small_image}" alt="Altmetric Badge" 
+                                     style="cursor: pointer; max-width: 64px; height: auto;" 
+                                     title="Click to view detailed Altmetric data"/>
+                            </a>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                        st.caption("Click badge for details")
+        else:
+            # Only show section if this is likely a publication that could have Altmetric data
+            # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
+            if 'openalex_ids' in pub_data:
+                st.markdown("#### Altmetric Attention")
+                st.info("No Altmetric data available for this publication.")
 
 
 # Register component

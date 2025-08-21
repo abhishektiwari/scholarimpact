@@ -10,7 +10,11 @@ import logging
 import os
 import time
 from datetime import datetime
+from typing import Dict, List, Optional
 
+import pyalex
+import requests
+from pyalex import Works
 from scholarly import scholarly
 
 logger = logging.getLogger(__name__)
@@ -19,13 +23,30 @@ logger = logging.getLogger(__name__)
 class AuthorExtractor:
     """Extract author data from Google Scholar."""
 
-    def __init__(self, delay=2):
+    def __init__(self, delay=2, use_openalex=True, openalex_email=None, use_altmetric=True):
         """Initialize the extractor.
 
         Args:
             delay: Delay between requests in seconds
+            use_openalex: Whether to use OpenAlex enrichment (default: True)
+            openalex_email: Email for OpenAlex API (optional, for higher rate limits)
+            use_altmetric: Whether to use Altmetric enrichment (default: True, requires OpenAlex)
         """
         self.delay = delay
+        self.use_openalex = use_openalex
+        self.openalex_email = openalex_email
+        self.use_altmetric = use_altmetric and use_openalex  # Altmetric requires OpenAlex
+        
+        # Configure pyalex if OpenAlex is enabled
+        if use_openalex:
+            if openalex_email:
+                pyalex.config.email = openalex_email
+                logger.info(f"OpenAlex configured with email: {openalex_email}")
+            else:
+                logger.info("OpenAlex enabled with default rate limits")
+        
+        if self.use_altmetric:
+            logger.info("Altmetric enrichment enabled")
 
     def extract(self, author_id, max_papers=None, output_file=None, output_dir="data"):
         """Extract author publications from Google Scholar.
@@ -131,6 +152,18 @@ class AuthorExtractor:
                     "cites_id": cites_id_str,
                     "analysis_date": datetime.now().isoformat(),
                 }
+                
+                # Enrich with OpenAlex data if enabled
+                if self.use_openalex:
+                    openalex_data = self._enrich_with_openalex(title, year)
+                    if openalex_data:
+                        result_record.update(openalex_data)
+                        
+                        # Enrich with Altmetric data if enabled and OpenAlex found identifiers
+                        if self.use_altmetric and 'openalex_ids' in result_record:
+                            altmetric_data = self._enrich_with_altmetric(result_record['openalex_ids'])
+                            if altmetric_data:
+                                result_record.update(altmetric_data)
 
                 results.append(result_record)
 
@@ -171,3 +204,115 @@ class AuthorExtractor:
             raise
 
         return author_data
+    
+    def _enrich_with_openalex(self, title: str, year: str) -> Optional[Dict]:
+        """Enrich publication data with OpenAlex information.
+        
+        Args:
+            title: Publication title
+            year: Publication year
+            
+        Returns:
+            Dictionary with OpenAlex data or None if not found
+        """
+        try:
+            # Search for the work by title and year
+            search_query = f'"{title}"'
+            if year and year != "Unknown":
+                search_query += f' AND publication_year:{year}'
+            
+            # Use pyalex to search
+            works = Works().filter(title_and_abstract={"search": title}).get()
+            
+            if not works or len(works) == 0:
+                logger.debug(f"No OpenAlex match found for: {title}")
+                return None
+            
+            # Get the best match (first result)
+            work = works[0]
+            
+            # Extract relevant fields with openalex_ prefix
+            openalex_data = {
+                "openalex_ids": work.get("ids", {}),  # Contains openalex, doi, mag, pmid, etc.
+                "openalex_type": work.get("type"),
+                "openalex_citation_normalized_percentile": work.get("citation_normalized_percentile"),
+                "openalex_cited_by_percentile_year": work.get("cited_by_percentile_year", {}).get("value") if work.get("cited_by_percentile_year") else None,
+                "openalex_fwci": work.get("fwci"),  # Field-Weighted Citation Impact
+                "openalex_cited_by_count": work.get("cited_by_count"),
+                "openalex_primary_topic": work.get("primary_topic", {}).get("display_name") if work.get("primary_topic") else None,
+                "openalex_domain": work.get("primary_topic", {}).get("domain", {}).get("display_name") if work.get("primary_topic") and work.get("primary_topic").get("domain") else None,
+                "openalex_field": work.get("primary_topic", {}).get("field", {}).get("display_name") if work.get("primary_topic") and work.get("primary_topic").get("field") else None,
+                "openalex_subfield": work.get("primary_topic", {}).get("subfield", {}).get("display_name") if work.get("primary_topic") and work.get("primary_topic").get("subfield") else None,
+            }
+            
+            # Clean up None values
+            openalex_data = {k: v for k, v in openalex_data.items() if v is not None}
+            
+            logger.debug(f"OpenAlex enrichment successful for: {title}")
+            return openalex_data
+            
+        except Exception as e:
+            logger.warning(f"Error enriching with OpenAlex for '{title}': {e}")
+            return None
+    
+    def _enrich_with_altmetric(self, ids: Dict) -> Optional[Dict]:
+        """Enrich publication data with Altmetric information.
+        
+        Args:
+            ids: Dictionary of identifiers from OpenAlex (doi, pmid, etc.)
+            
+        Returns:
+            Dictionary with Altmetric data or None if not found
+        """
+        if not ids:
+            return None
+        
+        # Try DOI first, then PMID
+        doi = ids.get('doi', '').replace('https://doi.org/', '') if ids.get('doi') else None
+        pmid = ids.get('pmid', '').replace('https://pubmed.ncbi.nlm.nih.gov/', '') if ids.get('pmid') else None
+        
+        altmetric_url = None
+        if doi:
+            altmetric_url = f"https://api.altmetric.com/v1/doi/{doi}"
+        elif pmid:
+            altmetric_url = f"https://api.altmetric.com/v1/pmid/{pmid}"
+        else:
+            return None
+        
+        try:
+            # Make request to Altmetric API
+            response = requests.get(altmetric_url, timeout=10)
+            
+            if response.status_code == 404:
+                logger.debug(f"No Altmetric data found for DOI: {doi} or PMID: {pmid}")
+                return None
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract relevant fields with altmetric_ prefix
+            altmetric_data = {
+                "altmetric_score": data.get("score"),
+                "altmetric_cited_by_wikipedia_count": data.get("cited_by_wikipedia_count"),
+                "altmetric_cited_by_patents_count": data.get("cited_by_patents_count"),
+                "altmetric_cited_by_accounts_count": data.get("cited_by_accounts_count"),
+                "altmetric_cited_by_posts_count": data.get("cited_by_posts_count"),
+                "altmetric_scopus_subjects": data.get("scopus_subjects"),
+                "altmetric_readers": data.get("readers"),
+                "altmetric_readers_count": data.get("readers_count"),
+                "altmetric_images": data.get("images"),
+                "altmetric_details_url": data.get("details_url"),
+            }
+            
+            # Clean up None values
+            altmetric_data = {k: v for k, v in altmetric_data.items() if v is not None}
+            
+            logger.debug(f"Altmetric enrichment successful for DOI: {doi} or PMID: {pmid}")
+            return altmetric_data
+            
+        except requests.RequestException as e:
+            logger.warning(f"Error fetching Altmetric data: {e}")
+            return None
+        except Exception as e:
+            logger.warning(f"Error processing Altmetric data: {e}")
+            return None
