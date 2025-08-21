@@ -138,6 +138,13 @@ class StreamlitAppComponent(BaseComponent):
             if "selected_article_slug" not in st.session_state:
                 st.session_state.selected_article_slug = None
                 st.session_state.selected_article_index = 0
+                st.session_state.last_sort_by = sort_by
+
+            # Reset selection if sort option changed
+            if st.session_state.get("last_sort_by") != sort_by:
+                st.session_state.selected_article_index = 0
+                st.session_state.selected_article_slug = None
+                st.session_state.last_sort_by = sort_by
 
             # Determine default index based on URL fragment
             default_index = 0
@@ -158,7 +165,7 @@ class StreamlitAppComponent(BaseComponent):
                 default_index = st.session_state.selected_article_index
 
             selected_display = st.sidebar.selectbox(
-                "Choose a publication:", display_titles, index=default_index, key="pub_selector"
+                "Choose a publication:", display_titles, index=default_index, key=f"pub_selector_{sort_by}"
             )
 
             # Track selectbox changes
@@ -211,18 +218,22 @@ class StreamlitAppComponent(BaseComponent):
         if author_data.get("affiliation"):
             st.sidebar.markdown(f"{author_data['affiliation']}")
 
-        # Links with buttons
-        col1, col2 = st.sidebar.columns(2)
-
-        with col1:
+        # Navigation-style links
+        if author_data.get("scholar_profile_url") or author_data.get("homepage"):
+            
             if author_data.get("scholar_profile_url"):
-                st.link_button(
-                    "Scholar", author_data["scholar_profile_url"], icon=":material/open_in_new:"
+                st.sidebar.page_link(
+                    author_data["scholar_profile_url"], 
+                    label="Google Scholar",
+                    icon=":material/school:"
                 )
-
-        with col2:
+            
             if author_data.get("homepage"):
-                st.link_button("Home", author_data["homepage"], icon=":material/open_in_new:")
+                st.sidebar.page_link(
+                    author_data["homepage"], 
+                    label="Homepage",
+                    icon=":material/home:"
+                )
 
         # Metrics
         st.sidebar.markdown("### Metrics")
@@ -1359,7 +1370,7 @@ class StreamlitAppComponent(BaseComponent):
                 images = pub_data.get('altmetric_images')
                 details_url = pub_data.get('altmetric_details_url')
                 
-                if images and details_url:
+                if images and details_url and isinstance(images, dict):
                     small_image = images.get('small')
                     if small_image:
                         # Create clickable image that opens in new tab
