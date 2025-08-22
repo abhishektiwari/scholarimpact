@@ -689,7 +689,6 @@ class StreamlitAppComponent(BaseComponent):
             )
 
             fig.update_layout(
-                title=f"Citations based on available country of authors",
                 xaxis_title="Country",
                 yaxis_title="Citations",
                 height=400,
@@ -697,10 +696,11 @@ class StreamlitAppComponent(BaseComponent):
             )
 
             st.plotly_chart(fig, use_container_width=True)
+            st.caption(f"Citations based on available country of authors. Top {len(countries)} countries.")
 
         # Citation Locations - World Map
         if has_enhanced_geo_data and "top_countries_from_affiliations" in pub_data:
-            st.markdown("### Citation Locations")
+            st.markdown("### Citation Distribution by Country")
 
             country_counts = pub_data["top_countries_from_affiliations"]
 
@@ -733,7 +733,6 @@ class StreamlitAppComponent(BaseComponent):
                         color="citations",
                         locationmode="ISO-3",
                         color_continuous_scale=COLOR_PALETTE["sequential"],
-                        title="Citations distribution by available country of authors",
                         labels={"citations": "Number of Citing Papers"},
                         hover_name="country_name",
                         hover_data={"country_3letter": False, "citations": True},
@@ -754,6 +753,14 @@ class StreamlitAppComponent(BaseComponent):
                             lakecolor=st.get_option("theme.backgroundColor") or "#fdfdf8",
                             showland=True,
                             landcolor=st.get_option("theme.secondaryBackgroundColor") or "#ecebe3",
+                        ),
+                        coloraxis_colorbar=dict(
+                            orientation="h",
+                            yanchor="bottom",
+                            y=-0.15,
+                            xanchor="center",
+                            x=0.5,
+                            title_side="top",
                         ),
                     )
 
@@ -788,11 +795,11 @@ class StreamlitAppComponent(BaseComponent):
                     # Summary statistics
                     total_countries = len(country_data)
                     total_papers = sum(item["citations"] for item in country_data)
-                    st.caption(f"Citations from {total_countries} countries")
+                    st.caption(f"Citations distribution by available country of authors. Citations from {total_countries} countries.")
 
         # Citations per year chart
         if has_enhanced_geo_data:
-            st.markdown("### Citations per Year")
+            st.markdown("### Citations Distribution by Year")
 
             year_data = self._get_citations_per_year(pub_data, data_dir)
 
@@ -803,19 +810,16 @@ class StreamlitAppComponent(BaseComponent):
 
                 fig = go.Figure()
                 fig.add_trace(
-                    go.Scatter(
+                    go.Bar(
                         x=years,
                         y=counts,
-                        mode="lines+markers",
-                        line=dict(color=COLOR_PALETTE["line_color"], width=3),
-                        marker=dict(size=8, color=COLOR_PALETTE["chart_colors"][0]),
-                        fill="tonexty",
-                        fillcolor=COLOR_PALETTE["fill_color"],
+                        marker=dict(color=COLOR_PALETTE["bar_color"]),
+                        text=counts,
+                        textposition="auto",
                     )
                 )
 
                 fig.update_layout(
-                    title="Citation trend over time",
                     xaxis_title="Year",
                     yaxis_title="Number of Citations",
                     height=400,
@@ -1384,7 +1388,6 @@ class StreamlitAppComponent(BaseComponent):
                             """,
                             unsafe_allow_html=True
                         )
-                        st.caption("Click badge for details")
         else:
             # Only show section if this is likely a publication that could have Altmetric data
             # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
