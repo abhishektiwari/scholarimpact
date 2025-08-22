@@ -16,7 +16,22 @@ This workflow extracts author data from your Google Scholar profile, then crawls
 ```mermaid
 flowchart TD
     A[Your Google Scholar Profile] --> B[Your Articles]
+    B --> C[OpenAlex API]
+    B --> D[Altmetric API]
+    C --> E[Enhanced Scholar Data]
+    D --> E[Enhanced Scholar Data]
+    
+    style A fill:#0ea5e9,stroke:#0ea5e9,color:#ffffff
+    style C fill:#059669,stroke:#059669,color:#ffffff
+    style D fill:#059669,stroke:#059669,color:#ffffff
+    style E fill:#ecebe3,stroke:#ecebe3,color:#3d3a2a
+```
+
+```mermaid
+flowchart TD
+    A[Enhanced Scholar Data] --> B[Your Articles]
     B --> C[Citing Articles]
+    B --> F[OpenAlex API]
     C --> D[Enhanced Citation Data]
     D --> E[Streamlit Dashboard]
     
@@ -37,7 +52,7 @@ flowchart TD
     K --> D
     L --> D
     
-    style A fill:#0ea5e9,stroke:#0ea5e9,color:#ffffff
+    style A fill:#ecebe3,stroke:#ecebe3,color:#3d3a2a
     style E fill:#cb785c,stroke:#cb785c,color:#ffffff
     style F fill:#059669,stroke:#059669,color:#ffffff
     style G fill:#fbbf24,stroke:#fbbf24,color:#3d3a2a
@@ -54,7 +69,7 @@ pip install scholarimpact
 ```
 
 ## Caution
-This system is designed for academic research purposes. Please use responsibly and in accordance with Google Scholar and OpenAlex's terms of services.
+This system is designed for academic research purposes and personal usage. Please use responsibly and in accordance with Google Scholar, OpenAlex, Altmetric terms of services with appropriate attribution.
 
 ## Step-by-Step Guide
 
@@ -192,7 +207,7 @@ scholarimpact crawl-citations data/author.json --openalex-email your.email@examp
 
 ```bash
 # Run dashboard directly
-scholarimpact dashboard
+ScholarImpact
 ```
 
 The dashboard opens at `http://localhost:8501`.
@@ -306,12 +321,12 @@ scholarimpact crawl-citations data/author.json --output-dir custom_data
 scholarimpact crawl-citations data/author.json --max-citations 100
 ```
 
-### `scholarimpact dashboard` Command
+### `ScholarImpact` Command
 
 Launch the interactive dashboard:
 
 ```bash
-scholarimpact dashboard [OPTIONS]
+ScholarImpact [OPTIONS]
 ```
 
 Options:
@@ -324,16 +339,16 @@ Options:
 Examples:
 ```bash
 # Basic usage
-scholarimpact dashboard
+ScholarImpact
 
 # Custom port
-scholarimpact dashboard --port 8502
+ScholarImpact --port 8502
 
 # External access
-scholarimpact dashboard --address 0.0.0.0
+ScholarImpact --address 0.0.0.0
 
 # Different data directory
-scholarimpact dashboard --data-dir custom_data
+ScholarImpact --data-dir custom_data
 ```
 
 ### `scholarimpact quick-start` Command

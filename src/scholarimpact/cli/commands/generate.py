@@ -21,7 +21,7 @@ def generate_dashboard(output_dir, name, data_dir, title):
     # Generate one-liner dashboard file
     dashboard_content = f'''#!/usr/bin/env python3
 """
-Generated ScholarImpact Dashboard
+Generated ScholarImpact
 """
 
 from scholarimpact.dashboard import Dashboard
@@ -118,7 +118,7 @@ For custom fonts, use the font family name after placing files here.
     click.echo(f"  python {name}")
     click.echo(f"")
     click.echo(f"Or manually:")
-    click.echo(f"  scholarimpact dashboard --data-dir {data_dir}")
+    click.echo(f"  ScholarImpact --data-dir {data_dir}")
 
     if data_dir != "./data":
         click.echo(f"\n Make sure your data is in: {data_dir}")

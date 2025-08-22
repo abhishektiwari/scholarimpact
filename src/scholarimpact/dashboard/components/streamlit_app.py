@@ -236,7 +236,7 @@ class StreamlitAppComponent(BaseComponent):
                 )
 
         # Metrics
-        st.sidebar.markdown("### Metrics")
+        st.sidebar.markdown("### :material/analytics: Metrics")
 
         col1, col2 = st.sidebar.columns(2)
         with col1:
@@ -252,6 +252,10 @@ class StreamlitAppComponent(BaseComponent):
 
         with col4:
             st.metric("i10-index", author_data.get("i10index", 0))
+
+        # Attribution section
+        st.sidebar.markdown("### :material/attribution: Attribution")
+        st.sidebar.markdown("Data sourced from Google Scholar, OpenAlex, and Altmetric.com for personal and fair usage.", )
 
         # Interests (only if show_interests is True)
         if show_interests and author_data.get("interests"):
@@ -432,6 +436,25 @@ class StreamlitAppComponent(BaseComponent):
 
         # Citation Summary
 
+        # Check for percentile badges for citations metric
+        citation_percentile = pub_data.get("openalex_citation_normalized_percentile")
+        yearly_percentile = pub_data.get("openalex_cited_by_percentile_year")
+        
+        is_top_1_percent = False
+        is_top_10_percent = False
+        
+        # Check citation percentile data
+        if isinstance(citation_percentile, dict):
+            is_top_1_percent = citation_percentile.get("is_in_top_1_percent", False)
+            is_top_10_percent = citation_percentile.get("is_in_top_10_percent", False)
+        
+        # Check yearly percentile data (override if true)
+        if isinstance(yearly_percentile, dict):
+            if yearly_percentile.get("is_in_top_1_percent", False):
+                is_top_1_percent = True
+            if yearly_percentile.get("is_in_top_10_percent", False):
+                is_top_10_percent = True
+
         # Create a 2x2 grid for metrics
         row1_col1, row1_col2 = st.columns(2)
         row2_col1, row2_col2 = st.columns(2)
@@ -450,8 +473,15 @@ class StreamlitAppComponent(BaseComponent):
             total_citations = int(pub_data.get("total_citations", 0))
 
             with row1_col1:
+                # Add percentile badge to citations metric title
+                citation_title = "Total Citations"
+                if is_top_1_percent:
+                    citation_title += " :green-badge[:material/social_leaderboard: TOP 1%]"
+                elif is_top_10_percent:
+                    citation_title += " :green-badge[:material/social_leaderboard: TOP 10%]"
+                
                 st.metric(
-                    "Total Citations",
+                    citation_title,
                     f"{total_citations:,}",
                     border=True,
                     help="Total number of citations for this publication",
@@ -483,8 +513,15 @@ class StreamlitAppComponent(BaseComponent):
         else:
             # Fallback metrics when enhanced data is Unknown
             with row1_col1:
+                # Add percentile badge to citations metric title
+                citation_title = "Total Citations"
+                if is_top_1_percent:
+                    citation_title += " :green-badge[:material/social_leaderboard: TOP 1%]"
+                elif is_top_10_percent:
+                    citation_title += " :green-badge[:material/social_leaderboard: TOP 10%]"
+                
                 st.metric(
-                    "Total Citations", 
+                    citation_title, 
                     f"{pub_data['total_citations']:,}",
                     border=True,
                     help="Total number of citations for this publication"
@@ -599,6 +636,33 @@ class StreamlitAppComponent(BaseComponent):
             unique_countries = int(pub_data["unique_countries_from_crawler"])
         else:
             unique_countries = pub_data.get("unique_countries", 0)
+
+        # Generate badges for top percentile articles
+        badges = ""
+        citation_percentile = pub_data.get("openalex_citation_normalized_percentile")
+        yearly_percentile = pub_data.get("openalex_cited_by_percentile_year")
+        
+        # Check for top percentile flags from either citation or yearly percentile data
+        is_top_1_percent = False
+        is_top_10_percent = False
+        
+        # Check citation percentile data
+        if isinstance(citation_percentile, dict):
+            is_top_1_percent = citation_percentile.get("is_in_top_1_percent", False)
+            is_top_10_percent = citation_percentile.get("is_in_top_10_percent", False)
+        
+        # Check yearly percentile data (override if true)
+        if isinstance(yearly_percentile, dict):
+            if yearly_percentile.get("is_in_top_1_percent", False):
+                is_top_1_percent = True
+            if yearly_percentile.get("is_in_top_10_percent", False):
+                is_top_10_percent = True
+        
+        # Add badges based on the flags
+        if is_top_1_percent:
+            badges += " :material/social_leaderboard: **TOP 1%**"
+        elif is_top_10_percent:
+            badges += " :material/social_leaderboard: **TOP 10%**"
 
         # Generate main insight
         if google_scholar_url:
@@ -1355,7 +1419,7 @@ class StreamlitAppComponent(BaseComponent):
         has_altmetric_data = any(field in pub_data and pub_data[field] is not None for field in altmetric_fields)
         
         if has_altmetric_data:
-            st.markdown("#### Altmetric Attention")
+            st.markdown("#### Altmetric Data")
             
             # Create 2x2 grid for metrics
             altmetric_row1_col1, altmetric_row1_col2 = st.columns(2)

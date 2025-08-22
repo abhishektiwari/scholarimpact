@@ -11,12 +11,12 @@ from ...dashboard.app import Dashboard
 
 @click.command(name="dashboard")
 @click.option("--data-dir", default="./data", help="Data directory")
-@click.option("--title", default="Citation Analysis Dashboard", help="Dashboard title")
+@click.option("--title", default="ScholarImpact", help="Dashboard title")
 @click.option("--port", default=8501, type=int, help="Port to run dashboard")
 @click.option("--host", default="localhost", help="Host to bind to")
 @click.option("--debug/--no-debug", default=False, help="Debug mode")
 def dashboard(data_dir, title, port, host, debug):
-    """Launch the citation analysis dashboard."""
+    """Launch the ScholarImpact."""
 
     click.echo(f"Starting dashboard with data from: {data_dir}")
 
