@@ -3,9 +3,11 @@ A bibliometric tool to analyse, visualise, and share your research impact, outpu
 
 For each article under your Google Scholar Profile, **_ScholarImpact_**: (1) total number of citations, (2) number of unique authors who have cited the article, (3) number of countries from which citations originate, (4) number of institutions from which citations originate, (5) geographic distribution of citations, (6) citation trends over time, (7) research domain analysis, (8) interdisciplinary impact Metrics including Patents and Wikipedia mentions.
 
-![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/example-dashboard.png)
+![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/example-dashboard-v3.png)
 
-![Research Domains Analysis](https://static.abhishek-tiwari.com/scholarimpact/research-domains.png)
+![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/geo-trends-v3.png)
+
+![Research Domains Analysis](https://static.abhishek-tiwari.com/scholarimpact/research-domains-v3.png)
 
 ## Workflow Overview
 This workflow extracts author data from your Google Scholar profile, then crawls citations for each article under your Google Scholar profile. Next workflow enriches them with information using Google Scholar profiles of citing authors and OpenAlex APIs. Finally, output data is used to present your impact of your research with geographic and institutional insights.
@@ -75,14 +77,17 @@ This creates a complete project structure with `app.py`, `requirements.txt`, `.s
 #### Step 2: Extract Author Publications
 
 ```bash
-# Extract your publications from Google Scholar
+# Extract your publications from Google Scholar (OpenAlex and Altmetric enabled by default)
 scholarimpact extract-author "YOUR_SCHOLAR_USER_ID"
+
+# With email for higher OpenAlex rate limits (recommended)
+scholarimpact extract-author "YOUR_SCHOLAR_USER_ID" --openalex-email your.email@example.com
 
 # Or use full URL
 scholarimpact extract-author "https://scholar.google.com/citations?user=YOUR_SCHOLAR_USER_ID"
 ```
 
-This creates `data/author.json` with your publication list.
+This creates `data/author.json` with your publication list, enriched with OpenAlex and Altmetric metrics by default.
 
 #### Step 3: Crawl Citation Data
 
@@ -196,7 +201,7 @@ The dashboard opens at `http://localhost:8501`.
 
 ### `scholarimpact extract-author` Command
 
-Extract author publications from Google Scholar:
+Extract author publications from Google Scholar with OpenAlex and Altmetric enrichment:
 
 ```bash
 scholarimpact extract-author [OPTIONS] SCHOLAR_ID
@@ -212,17 +217,55 @@ Options:
 | `--delay X` | float | 2.0 | Delay between requests in seconds |
 | `--output-dir DIR` | str | ./data | Output directory for author.json |
 | `--output-file FILE` | str | None | Custom output file path (overrides output-dir) |
+| `--use-openalex/--no-openalex` | flag | True | Enable OpenAlex enrichment (default: enabled) |
+| `--openalex-email EMAIL` | str | None | Email for OpenAlex API (optional, for higher rate limits) |
+| `--use-altmetric/--no-altmetric` | flag | True | Enable Altmetric enrichment (requires OpenAlex, default: enabled) |
+
+OpenAlex enrichment adds (all fields prefixed with `openalex_`):
+- `openalex_ids`: Object containing all identifiers:
+  - `openalex`: OpenAlex work URL
+  - `doi`: Digital Object Identifier URL
+  - `mag`: Microsoft Academic Graph ID
+  - `pmid`: PubMed ID URL
+- `openalex_type`: Publication type (article, book, etc.)
+- `openalex_citation_normalized_percentile`: Percentile ranking of citations
+- `openalex_cited_by_percentile_year`: Citation percentile by year
+- `openalex_fwci`: Field-Weighted Citation Impact
+- `openalex_cited_by_count`: OpenAlex citation count
+- `openalex_primary_topic`: Main research topic
+- `openalex_domain`, `openalex_field`, `openalex_subfield`: Hierarchical classification
+
+Altmetric enrichment adds (all fields prefixed with `altmetric_`):
+- `altmetric_score`: Overall Altmetric attention score
+- `altmetric_cited_by_wikipedia_count`: Citations in Wikipedia
+- `altmetric_cited_by_patents_count`: Citations in patents
+- `altmetric_cited_by_accounts_count`: Social media accounts mentioning
+- `altmetric_cited_by_posts_count`: Social media posts mentioning
+- `altmetric_scopus_subjects`: Scopus subject classifications
+- `altmetric_readers`: Reader counts by platform (Mendeley, CiteULike, etc.)
+- `altmetric_readers_count`: Total reader count
+- `altmetric_images`: Altmetric badge images (small, medium, large)
+- `altmetric_details_url`: Link to detailed Altmetric page
 
 Examples:
 ```bash
-# Basic usage
+# Basic usage (OpenAlex and Altmetric enabled by default)
 scholarimpact extract-author "ABC123DEF"
+
+# With email for higher OpenAlex rate limits
+scholarimpact extract-author "ABC123DEF" --openalex-email your.email@example.com
+
+# Disable Altmetric enrichment (keep OpenAlex)
+scholarimpact extract-author "ABC123DEF" --no-altmetric
+
+# Disable all enrichment (Google Scholar only)
+scholarimpact extract-author "ABC123DEF" --no-openalex --no-altmetric
 
 # Limit to first 20 papers with 3-second delays
 scholarimpact extract-author "ABC123DEF" --max-papers 20 --delay 3
 
-# Custom output file
-scholarimpact extract-author "ABC123DEF" --output-file data/my_author.json
+# Custom output file with email for higher limits
+scholarimpact extract-author "ABC123DEF" --output-file data/my_author.json --openalex-email your.email@example.com
 
 # Full URL format
 scholarimpact extract-author "https://scholar.google.com/citations?user=ABC123DEF"
@@ -246,8 +289,6 @@ Options:
 | `--max-citations N` | int | None | Maximum citations per paper |
 | `--delay-min X` | float | 5.0 | Minimum delay between requests (seconds) |
 | `--delay-max Y` | float | 10.0 | Maximum delay between requests (seconds) |
-| `--delay-between-articles-min X` | float | 16.0 | Minimum delay between articles (seconds) |
-| `--delay-between-articles-max Y` | float | 22.0 | Maximum delay between articles (seconds) |
 | `--output-dir DIR` | str | None | Output directory (defaults to author.json directory) |
 
 Examples:

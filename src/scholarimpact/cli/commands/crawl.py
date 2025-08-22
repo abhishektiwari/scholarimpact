@@ -18,18 +18,6 @@ from ...core.crawler import CitationCrawler
 @click.option(
     "--delay-max", default=10.0, type=float, help="Maximum delay between requests (default: 10.0)"
 )
-@click.option(
-    "--delay-between-articles-min",
-    default=16.0,
-    type=float,
-    help="Minimum delay between articles (default: 16.0)",
-)
-@click.option(
-    "--delay-between-articles-max",
-    default=22.0,
-    type=float,
-    help="Maximum delay between articles (default: 22.0)",
-)
 @click.option("--output-dir", help="Output directory (defaults to author.json directory)")
 def crawl_citations(
     author_json,
@@ -37,8 +25,6 @@ def crawl_citations(
     max_citations,
     delay_min,
     delay_max,
-    delay_between_articles_min,
-    delay_between_articles_max,
     output_dir,
 ):
     """Crawl citations for publications in author.json file."""
@@ -92,9 +78,15 @@ def crawl_citations(
 
             try:
                 # Crawl citations
+                # Convert max_citations to max_pages (10 citations per page typically)
+                max_pages = None if max_citations is None else (max_citations + 9) // 10
                 citations = crawler.crawl_all_citations(
-                    cites_id, max_pages=None  # max_citations is handled differently
+                    cites_id, max_pages=max_pages
                 )
+
+                # Limit citations if max_citations is specified
+                if max_citations and citations and len(citations) > max_citations:
+                    citations = citations[:max_citations]
 
                 # Save citations to file
                 if citations:

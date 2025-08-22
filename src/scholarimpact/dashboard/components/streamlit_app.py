@@ -138,6 +138,13 @@ class StreamlitAppComponent(BaseComponent):
             if "selected_article_slug" not in st.session_state:
                 st.session_state.selected_article_slug = None
                 st.session_state.selected_article_index = 0
+                st.session_state.last_sort_by = sort_by
+
+            # Reset selection if sort option changed
+            if st.session_state.get("last_sort_by") != sort_by:
+                st.session_state.selected_article_index = 0
+                st.session_state.selected_article_slug = None
+                st.session_state.last_sort_by = sort_by
 
             # Determine default index based on URL fragment
             default_index = 0
@@ -158,7 +165,7 @@ class StreamlitAppComponent(BaseComponent):
                 default_index = st.session_state.selected_article_index
 
             selected_display = st.sidebar.selectbox(
-                "Choose a publication:", display_titles, index=default_index, key="pub_selector"
+                "Choose a publication:", display_titles, index=default_index, key=f"pub_selector_{sort_by}"
             )
 
             # Track selectbox changes
@@ -211,18 +218,22 @@ class StreamlitAppComponent(BaseComponent):
         if author_data.get("affiliation"):
             st.sidebar.markdown(f"{author_data['affiliation']}")
 
-        # Links with buttons
-        col1, col2 = st.sidebar.columns(2)
-
-        with col1:
+        # Navigation-style links
+        if author_data.get("scholar_profile_url") or author_data.get("homepage"):
+            
             if author_data.get("scholar_profile_url"):
-                st.link_button(
-                    "Scholar", author_data["scholar_profile_url"], icon=":material/open_in_new:"
+                st.sidebar.page_link(
+                    author_data["scholar_profile_url"], 
+                    label="Google Scholar",
+                    icon=":material/school:"
                 )
-
-        with col2:
+            
             if author_data.get("homepage"):
-                st.link_button("Home", author_data["homepage"], icon=":material/open_in_new:")
+                st.sidebar.page_link(
+                    author_data["homepage"], 
+                    label="Homepage",
+                    icon=":material/home:"
+                )
 
         # Metrics
         st.sidebar.markdown("### Metrics")
@@ -420,9 +431,10 @@ class StreamlitAppComponent(BaseComponent):
         st.markdown(insight)
 
         # Citation Summary
-        st.markdown("### Citation Summary")
 
-        col1, col2, col3, col4 = st.columns(4)
+        # Create a 2x2 grid for metrics
+        row1_col1, row1_col2 = st.columns(2)
+        row2_col1, row2_col2 = st.columns(2)
 
         # Get comprehensive stats
         has_enhanced_geo_data = (
@@ -437,55 +449,82 @@ class StreamlitAppComponent(BaseComponent):
             total_authors = int(pub_data.get("unique_citing_authors_from_crawler", 0))
             total_citations = int(pub_data.get("total_citations", 0))
 
-            with col1:
+            with row1_col1:
                 st.metric(
                     "Total Citations",
                     f"{total_citations:,}",
+                    border=True,
                     help="Total number of citations for this publication",
                 )
 
-            with col2:
+            with row1_col2:
                 st.metric(
                     "Unique Authors",
                     f"{total_authors:,}",
+                    border=True,
                     help="Number of unique authors who have cited this work",
                 )
 
-            with col3:
+            with row2_col1:
                 st.metric(
                     "Countries",
                     f"{len(countries_data):,}",
+                    border=True,
                     help="Number of countries from which citations originate",
                 )
 
-            with col4:
+            with row2_col2:
                 st.metric(
                     "Institutions",
                     f"{len(institutions_data):,}",
+                    border=True,
                     help="Number of institutions whose researchers have cited this work",
                 )
         else:
             # Fallback metrics when enhanced data is Unknown
-            with col1:
-                st.metric("Total Citations", f"{pub_data['total_citations']:,}")
+            with row1_col1:
+                st.metric(
+                    "Total Citations", 
+                    f"{pub_data['total_citations']:,}",
+                    border=True,
+                    help="Total number of citations for this publication"
+                )
 
-            with col2:
+            with row1_col2:
                 if "unique_citing_authors_from_crawler" in pub_data and pd.notna(
                     pub_data["unique_citing_authors_from_crawler"]
                 ):
                     st.metric(
-                        "Citing Authors", f"{int(pub_data['unique_citing_authors_from_crawler']):,}"
+                        "Citing Authors", 
+                        f"{int(pub_data['unique_citing_authors_from_crawler']):,}",
+                        border=True,
+                        help="Number of unique authors who have cited this work"
                     )
                 elif "unique_citing_authors" in pub_data:
-                    st.metric("Citing Authors", f"{int(pub_data['unique_citing_authors']):,}")
+                    st.metric(
+                        "Citing Authors", 
+                        f"{int(pub_data['unique_citing_authors']):,}",
+                        border=True,
+                        help="Number of unique authors who have cited this work"
+                    )
 
-            with col3:
+            with row2_col1:
                 if "unique_countries" in pub_data:
-                    st.metric("Countries", f"{int(pub_data['unique_countries']):,}")
+                    st.metric(
+                        "Countries", 
+                        f"{int(pub_data['unique_countries']):,}",
+                        border=True,
+                        help="Number of countries from which citations originate"
+                    )
 
-            with col4:
+            with row2_col2:
                 if "unique_institutions" in pub_data:
-                    st.metric("Institutions", f"{int(pub_data['unique_institutions']):,}")
+                    st.metric(
+                        "Institutions", 
+                        f"{int(pub_data['unique_institutions']):,}",
+                        border=True,
+                        help="Number of institutions whose researchers have cited this work"
+                    )
 
         # Visualizations
         st.markdown("---")
@@ -678,7 +717,6 @@ class StreamlitAppComponent(BaseComponent):
             )
 
             fig.update_layout(
-                title=f"Citations based on available country of authors",
                 xaxis_title="Country",
                 yaxis_title="Citations",
                 height=400,
@@ -686,10 +724,11 @@ class StreamlitAppComponent(BaseComponent):
             )
 
             st.plotly_chart(fig, use_container_width=True)
+            st.caption(f"Citations based on available country of authors. Top {len(countries)} countries.")
 
         # Citation Locations - World Map
         if has_enhanced_geo_data and "top_countries_from_affiliations" in pub_data:
-            st.markdown("### Citation Locations")
+            st.markdown("### Citation Distribution by Country")
 
             country_counts = pub_data["top_countries_from_affiliations"]
 
@@ -722,7 +761,6 @@ class StreamlitAppComponent(BaseComponent):
                         color="citations",
                         locationmode="ISO-3",
                         color_continuous_scale=COLOR_PALETTE["sequential"],
-                        title="Citations distribution by available country of authors",
                         labels={"citations": "Number of Citing Papers"},
                         hover_name="country_name",
                         hover_data={"country_3letter": False, "citations": True},
@@ -743,6 +781,14 @@ class StreamlitAppComponent(BaseComponent):
                             lakecolor=st.get_option("theme.backgroundColor") or "#fdfdf8",
                             showland=True,
                             landcolor=st.get_option("theme.secondaryBackgroundColor") or "#ecebe3",
+                        ),
+                        coloraxis_colorbar=dict(
+                            orientation="h",
+                            yanchor="bottom",
+                            y=-0.15,
+                            xanchor="center",
+                            x=0.5,
+                            title_side="top",
                         ),
                     )
 
@@ -777,11 +823,11 @@ class StreamlitAppComponent(BaseComponent):
                     # Summary statistics
                     total_countries = len(country_data)
                     total_papers = sum(item["citations"] for item in country_data)
-                    st.caption(f"Citations from {total_countries} countries")
+                    st.caption(f"Citations distribution by available country of authors. Citations from {total_countries} countries.")
 
         # Citations per year chart
         if has_enhanced_geo_data:
-            st.markdown("### Citations per Year")
+            st.markdown("### Citations Distribution by Year")
 
             year_data = self._get_citations_per_year(pub_data, data_dir)
 
@@ -792,19 +838,16 @@ class StreamlitAppComponent(BaseComponent):
 
                 fig = go.Figure()
                 fig.add_trace(
-                    go.Scatter(
+                    go.Bar(
                         x=years,
                         y=counts,
-                        mode="lines+markers",
-                        line=dict(color=COLOR_PALETTE["line_color"], width=3),
-                        marker=dict(size=8, color=COLOR_PALETTE["chart_colors"][0]),
-                        fill="tonexty",
-                        fillcolor=COLOR_PALETTE["fill_color"],
+                        marker=dict(color=COLOR_PALETTE["bar_color"]),
+                        text=counts,
+                        textposition="auto",
                     )
                 )
 
                 fig.update_layout(
-                    title="Citation trend over time",
                     xaxis_title="Year",
                     yaxis_title="Number of Citations",
                     height=400,
@@ -967,28 +1010,46 @@ class StreamlitAppComponent(BaseComponent):
             if domain_data.get("domains") and domain_data.get("fields"):
                 st.markdown("#### Interdisciplinary Impact Metrics")
 
-                # Add patent citation count
-                patent_count = self._count_patent_citations(pub_data, data_dir)
+                # Calculate patent citation count using highest value from available sources
+                patent_count_us = self._count_patent_citations(pub_data, data_dir)  # US patents
+                
+                # Get Altmetric patent count (all patents)
+                altmetric_patent_count = pub_data.get('altmetric_cited_by_patents_count')
+                if pd.isna(altmetric_patent_count):
+                    altmetric_patent_count = 0
+                else:
+                    altmetric_patent_count = int(altmetric_patent_count) if altmetric_patent_count else 0
+                
+                # Use the highest count and determine help text
+                patent_count = max(patent_count_us, altmetric_patent_count)
+                if altmetric_patent_count > patent_count_us:
+                    patent_help_text = "Number of patents citing this work (Altmetric data)"
+                else:
+                    patent_help_text = "Number of US patents citing this work"
 
-                col1, col2, col3, col4 = st.columns(4)
+                # Create 2x2 grid for metrics
+                impact_row1_col1, impact_row1_col2 = st.columns(2)
+                impact_row2_col1, impact_row2_col2 = st.columns(2)
 
-                with col1:
+                with impact_row1_col1:
                     domain_count = len(domain_data["domains"])
                     st.metric(
                         "Research Domains",
                         domain_count,
+                        border=True,
                         help="Number of distinct research domains citing this work",
                     )
 
-                with col2:
+                with impact_row1_col2:
                     field_count = len(domain_data["fields"])
                     st.metric(
                         "Research Fields",
                         field_count,
+                        border=True,
                         help="Number of distinct research fields citing this work",
                     )
 
-                with col3:
+                with impact_row2_col1:
                     # Calculate diversity index (Shannon entropy)
                     import math
 
@@ -1008,19 +1069,24 @@ class StreamlitAppComponent(BaseComponent):
                     st.metric(
                         "Diversity Score",
                         f"{diversity_score}%",
+                        border=True,
                         help="Shannon entropy-based measure of research field diversity (100% = perfectly diverse)",
                     )
 
-                with col4:
+                with impact_row2_col2:
                     st.metric(
                         "Patent Citations",
                         patent_count,
-                        help="Number of US patents citing this work",
+                        border=True,
+                        help=patent_help_text,
                     )
         else:
             st.info(
-                "Research domain analysis requires citation data with OpenAlex primary_topic information. Re-crawl with OpenAlex enabled to see this analysis."
+                "Research domain analysis requires citation data with OpenAlex. Re-crawl with OpenAlex enabled to see this analysis."
             )
+        
+        # Altmetric Section
+        self._render_altmetric_section(pub_data)
 
     def _get_citations_per_year(self, pub_data: pd.Series, data_dir: str) -> Dict[int, int]:
         """Get citations per year exactly as in original."""
@@ -1274,6 +1340,104 @@ class StreamlitAppComponent(BaseComponent):
         citations_table.sort(key=sort_key)
 
         return citations_table
+
+    def _render_altmetric_section(self, pub_data: pd.Series):
+        """Render Altmetric metrics section."""
+        # Check if any Altmetric data is available
+        altmetric_fields = [
+            'altmetric_cited_by_wikipedia_count',
+            'altmetric_cited_by_posts_count',
+            'altmetric_readers_count',
+            'altmetric_images',
+            'altmetric_details_url'
+        ]
+        
+        has_altmetric_data = any(field in pub_data and pub_data[field] is not None for field in altmetric_fields)
+        
+        if has_altmetric_data:
+            st.markdown("#### Altmetric Attention")
+            
+            # Create 2x2 grid for metrics
+            altmetric_row1_col1, altmetric_row1_col2 = st.columns(2)
+            altmetric_row2_col1, altmetric_row2_col2 = st.columns(2)
+                
+            with altmetric_row1_col1:
+                wikipedia_count = pub_data.get('altmetric_cited_by_wikipedia_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(wikipedia_count):
+                    wikipedia_count = 0
+                else:
+                    wikipedia_count = int(wikipedia_count) if wikipedia_count else 0
+                st.metric(
+                    "Wikipedia Citations",
+                    wikipedia_count,
+                    border=True,
+                    help="Number of times cited in Wikipedia articles"
+                )
+            
+            with altmetric_row1_col2:
+                posts_count = pub_data.get('altmetric_cited_by_posts_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(posts_count):
+                    posts_count = 0
+                else:
+                    posts_count = int(posts_count) if posts_count else 0
+                st.metric(
+                    "Social Media Posts",
+                    posts_count,
+                    border=True,
+                    help="Number of social media posts mentioning this work"
+                )
+            
+            with altmetric_row2_col1:
+                readers_count = pub_data.get('altmetric_readers_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(readers_count):
+                    readers_count = 0
+                else:
+                    readers_count = int(readers_count) if readers_count else 0
+                st.metric(
+                    "Readers Count",
+                    readers_count,
+                    border=True,
+                    help="Total number of readers across all platforms (Mendeley, CiteULike, etc.)"
+                )
+            
+            with altmetric_row2_col2:
+                # Display Altmetric badge as a metric card
+                images = pub_data.get('altmetric_images')
+                details_url = pub_data.get('altmetric_details_url')
+                
+                if images and details_url and isinstance(images, dict):
+                    badge_image = images.get('small')
+                    if badge_image:
+                        # Create metric-style container for the badge
+                        st.markdown(
+                            f"""
+                            <div style="padding: 16px; text-align: center;">
+                                <a href="{details_url}" target="_blank">
+                                    <img src="{badge_image}" alt="Altmetric Badge" 
+                                         style="cursor: pointer; height: auto;" 
+                                         title="Click to view detailed Altmetric data"/>
+                                </a>
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+                else:
+                    # Show placeholder metric if no badge available
+                    st.metric(
+                        "Altmetric Badge",
+                        "N/A",
+                        border=False,
+                        help="Altmetric attention badge not available for this publication"
+                    )
+        else:
+            # Only show section if this is likely a publication that could have Altmetric data
+            # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
+            if 'openalex_ids' in pub_data:
+                st.markdown("#### Altmetric Attention")
+                st.info("No Altmetric data available for this publication.")
 
 
 # Register component
