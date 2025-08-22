@@ -431,9 +431,10 @@ class StreamlitAppComponent(BaseComponent):
         st.markdown(insight)
 
         # Citation Summary
-        st.markdown("### Citation Summary")
 
-        col1, col2, col3, col4 = st.columns(4)
+        # Create a 2x2 grid for metrics
+        row1_col1, row1_col2 = st.columns(2)
+        row2_col1, row2_col2 = st.columns(2)
 
         # Get comprehensive stats
         has_enhanced_geo_data = (
@@ -448,55 +449,82 @@ class StreamlitAppComponent(BaseComponent):
             total_authors = int(pub_data.get("unique_citing_authors_from_crawler", 0))
             total_citations = int(pub_data.get("total_citations", 0))
 
-            with col1:
+            with row1_col1:
                 st.metric(
                     "Total Citations",
                     f"{total_citations:,}",
+                    border=True,
                     help="Total number of citations for this publication",
                 )
 
-            with col2:
+            with row1_col2:
                 st.metric(
                     "Unique Authors",
                     f"{total_authors:,}",
+                    border=True,
                     help="Number of unique authors who have cited this work",
                 )
 
-            with col3:
+            with row2_col1:
                 st.metric(
                     "Countries",
                     f"{len(countries_data):,}",
+                    border=True,
                     help="Number of countries from which citations originate",
                 )
 
-            with col4:
+            with row2_col2:
                 st.metric(
                     "Institutions",
                     f"{len(institutions_data):,}",
+                    border=True,
                     help="Number of institutions whose researchers have cited this work",
                 )
         else:
             # Fallback metrics when enhanced data is Unknown
-            with col1:
-                st.metric("Total Citations", f"{pub_data['total_citations']:,}")
+            with row1_col1:
+                st.metric(
+                    "Total Citations", 
+                    f"{pub_data['total_citations']:,}",
+                    border=True,
+                    help="Total number of citations for this publication"
+                )
 
-            with col2:
+            with row1_col2:
                 if "unique_citing_authors_from_crawler" in pub_data and pd.notna(
                     pub_data["unique_citing_authors_from_crawler"]
                 ):
                     st.metric(
-                        "Citing Authors", f"{int(pub_data['unique_citing_authors_from_crawler']):,}"
+                        "Citing Authors", 
+                        f"{int(pub_data['unique_citing_authors_from_crawler']):,}",
+                        border=True,
+                        help="Number of unique authors who have cited this work"
                     )
                 elif "unique_citing_authors" in pub_data:
-                    st.metric("Citing Authors", f"{int(pub_data['unique_citing_authors']):,}")
+                    st.metric(
+                        "Citing Authors", 
+                        f"{int(pub_data['unique_citing_authors']):,}",
+                        border=True,
+                        help="Number of unique authors who have cited this work"
+                    )
 
-            with col3:
+            with row2_col1:
                 if "unique_countries" in pub_data:
-                    st.metric("Countries", f"{int(pub_data['unique_countries']):,}")
+                    st.metric(
+                        "Countries", 
+                        f"{int(pub_data['unique_countries']):,}",
+                        border=True,
+                        help="Number of countries from which citations originate"
+                    )
 
-            with col4:
+            with row2_col2:
                 if "unique_institutions" in pub_data:
-                    st.metric("Institutions", f"{int(pub_data['unique_institutions']):,}")
+                    st.metric(
+                        "Institutions", 
+                        f"{int(pub_data['unique_institutions']):,}",
+                        border=True,
+                        help="Number of institutions whose researchers have cited this work"
+                    )
 
         # Visualizations
         st.markdown("---")
@@ -999,25 +1027,29 @@ class StreamlitAppComponent(BaseComponent):
                 else:
                     patent_help_text = "Number of US patents citing this work"
 
-                col1, col2, col3, col4 = st.columns(4)
+                # Create 2x2 grid for metrics
+                impact_row1_col1, impact_row1_col2 = st.columns(2)
+                impact_row2_col1, impact_row2_col2 = st.columns(2)
 
-                with col1:
+                with impact_row1_col1:
                     domain_count = len(domain_data["domains"])
                     st.metric(
                         "Research Domains",
                         domain_count,
+                        border=True,
                         help="Number of distinct research domains citing this work",
                     )
 
-                with col2:
+                with impact_row1_col2:
                     field_count = len(domain_data["fields"])
                     st.metric(
                         "Research Fields",
                         field_count,
+                        border=True,
                         help="Number of distinct research fields citing this work",
                     )
 
-                with col3:
+                with impact_row2_col1:
                     # Calculate diversity index (Shannon entropy)
                     import math
 
@@ -1037,18 +1069,20 @@ class StreamlitAppComponent(BaseComponent):
                     st.metric(
                         "Diversity Score",
                         f"{diversity_score}%",
+                        border=True,
                         help="Shannon entropy-based measure of research field diversity (100% = perfectly diverse)",
                     )
 
-                with col4:
+                with impact_row2_col2:
                     st.metric(
                         "Patent Citations",
                         patent_count,
+                        border=True,
                         help=patent_help_text,
                     )
         else:
             st.info(
-                "Research domain analysis requires citation data with OpenAlex primary_topic information. Re-crawl with OpenAlex enabled to see this analysis."
+                "Research domain analysis requires citation data with OpenAlex. Re-crawl with OpenAlex enabled to see this analysis."
             )
         
         # Altmetric Section
@@ -1323,71 +1357,81 @@ class StreamlitAppComponent(BaseComponent):
         if has_altmetric_data:
             st.markdown("#### Altmetric Attention")
             
-            # Create columns for metrics and badge
-            col1, col2 = st.columns([3, 1])
+            # Create 2x2 grid for metrics
+            altmetric_row1_col1, altmetric_row1_col2 = st.columns(2)
+            altmetric_row2_col1, altmetric_row2_col2 = st.columns(2)
+                
+            with altmetric_row1_col1:
+                wikipedia_count = pub_data.get('altmetric_cited_by_wikipedia_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(wikipedia_count):
+                    wikipedia_count = 0
+                else:
+                    wikipedia_count = int(wikipedia_count) if wikipedia_count else 0
+                st.metric(
+                    "Wikipedia Citations",
+                    wikipedia_count,
+                    border=True,
+                    help="Number of times cited in Wikipedia articles"
+                )
             
-            with col1:
-                # Display metrics in sub-columns
-                metric_col1, metric_col2, metric_col3 = st.columns(3)
-                
-                with metric_col1:
-                    wikipedia_count = pub_data.get('altmetric_cited_by_wikipedia_count')
-                    # Handle NaN/None values using pandas isna
-                    if pd.isna(wikipedia_count):
-                        wikipedia_count = 0
-                    else:
-                        wikipedia_count = int(wikipedia_count) if wikipedia_count else 0
-                    st.metric(
-                        "Wikipedia Citations",
-                        wikipedia_count,
-                        help="Number of times cited in Wikipedia articles"
-                    )
-                
-                with metric_col2:
-                    posts_count = pub_data.get('altmetric_cited_by_posts_count')
-                    # Handle NaN/None values using pandas isna
-                    if pd.isna(posts_count):
-                        posts_count = 0
-                    else:
-                        posts_count = int(posts_count) if posts_count else 0
-                    st.metric(
-                        "Social Media Posts",
-                        posts_count,
-                        help="Number of social media posts mentioning this work"
-                    )
-                
-                with metric_col3:
-                    readers_count = pub_data.get('altmetric_readers_count')
-                    # Handle NaN/None values using pandas isna
-                    if pd.isna(readers_count):
-                        readers_count = 0
-                    else:
-                        readers_count = int(readers_count) if readers_count else 0
-                    st.metric(
-                        "Readers Count",
-                        readers_count,
-                        help="Total number of readers across all platforms (Mendeley, CiteULike, etc.)"
-                    )
+            with altmetric_row1_col2:
+                posts_count = pub_data.get('altmetric_cited_by_posts_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(posts_count):
+                    posts_count = 0
+                else:
+                    posts_count = int(posts_count) if posts_count else 0
+                st.metric(
+                    "Social Media Posts",
+                    posts_count,
+                    border=True,
+                    help="Number of social media posts mentioning this work"
+                )
             
-            with col2:
-                # Display Altmetric badge with link
+            with altmetric_row2_col1:
+                readers_count = pub_data.get('altmetric_readers_count')
+                # Handle NaN/None values using pandas isna
+                if pd.isna(readers_count):
+                    readers_count = 0
+                else:
+                    readers_count = int(readers_count) if readers_count else 0
+                st.metric(
+                    "Readers Count",
+                    readers_count,
+                    border=True,
+                    help="Total number of readers across all platforms (Mendeley, CiteULike, etc.)"
+                )
+            
+            with altmetric_row2_col2:
+                # Display Altmetric badge as a metric card
                 images = pub_data.get('altmetric_images')
                 details_url = pub_data.get('altmetric_details_url')
                 
                 if images and details_url and isinstance(images, dict):
-                    small_image = images.get('small')
-                    if small_image:
-                        # Create clickable image that opens in new tab
+                    badge_image = images.get('small')
+                    if badge_image:
+                        # Create metric-style container for the badge
                         st.markdown(
                             f"""
-                            <a href="{details_url}" target="_blank">
-                                <img src="{small_image}" alt="Altmetric Badge" 
-                                     style="cursor: pointer; max-width: 64px; height: auto;" 
-                                     title="Click to view detailed Altmetric data"/>
-                            </a>
+                            <div style="padding: 16px; text-align: center;">
+                                <a href="{details_url}" target="_blank">
+                                    <img src="{badge_image}" alt="Altmetric Badge" 
+                                         style="cursor: pointer; height: auto;" 
+                                         title="Click to view detailed Altmetric data"/>
+                                </a>
+                            </div>
                             """,
                             unsafe_allow_html=True
                         )
+                else:
+                    # Show placeholder metric if no badge available
+                    st.metric(
+                        "Altmetric Badge",
+                        "N/A",
+                        border=False,
+                        help="Altmetric attention badge not available for this publication"
+                    )
         else:
             # Only show section if this is likely a publication that could have Altmetric data
             # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
