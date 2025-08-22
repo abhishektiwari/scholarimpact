@@ -157,7 +157,7 @@ class LayoutManager:
     def create_original_layout(self) -> DashboardLayout:
         """Create layout matching original streamlit_app.py exactly."""
         return DashboardLayout(
-            title="Citation Analysis Dashboard",
+            title="ScholarImpact",
             sidebar_sections=[
                 LayoutConfig(
                     layout_type=LayoutType.SIDEBAR, components=["streamlit_app"], config={}

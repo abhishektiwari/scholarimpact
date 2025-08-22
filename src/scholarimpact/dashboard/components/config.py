@@ -20,7 +20,7 @@ class ComponentConfig:
 class DashboardConfig:
     """Complete dashboard configuration."""
 
-    title: str = "Citation Analysis Dashboard"
+    title: str = "ScholarImpact"
     layout_template: str = "original"
     theme: str = "auto"
     components: List[ComponentConfig] = field(default_factory=list)
@@ -39,7 +39,7 @@ class DashboardConfig:
             components.append(ComponentConfig(**comp_data))
 
         return cls(
-            title=data.get("title", "Citation Analysis Dashboard"),
+            title=data.get("title", "ScholarImpact"),
             layout_template=data.get("layout_template", "original"),
             theme=data.get("theme", "auto"),
             components=components,
@@ -69,7 +69,7 @@ class ConfigManager:
     def get_default_config(self) -> DashboardConfig:
         """Get default dashboard configuration."""
         return DashboardConfig(
-            title="Citation Analysis Dashboard",
+            title="ScholarImpact",
             layout_template="original",
             theme="auto",
             components=[ComponentConfig(name="streamlit_app", enabled=True, config={})],
@@ -80,7 +80,7 @@ class ConfigManager:
 # Preset configurations
 PRESET_CONFIGS = {
     "original": DashboardConfig(
-        title="Citation Analysis Dashboard",
+        title="ScholarImpact",
         layout_template="original",
         components=[ComponentConfig("streamlit_app", enabled=True, config={})],
     )
