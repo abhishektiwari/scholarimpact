@@ -418,25 +418,28 @@ This command generates:
 
 ## Citation
 
+[![zenodo.17282762](https://zenodo.org/badge/DOI/10.5281/zenodo.17282762.svg)](https://doi.org/10.5281/zenodo.17282762)
+
 If you use ScholarImpact in your research, please cite it as:
 
 ```bibtex
-@software{tiwari2025scholarimpact,
-  author = {Tiwari, Abhishek},
-  title = {ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data},
-  version = {0.0.1},
-  year = {2025},
-  month = {8},
-  url = {https://github.com/abhishektiwari/scholarimpact},
+@software{tiwari_2025_17282762,
+  author       = {Tiwari, Abhishek},
+  title        = {ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data},
+  month        = oct,
+  year         = 2025,
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.17282762},
+  url          = {https://doi.org/10.5281/zenodo.17282762},
 }
 ```
 
 **APA Format:**
 ```
-Tiwari, A. (2025). ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data (Version 0.0.1) [Computer software]. https://github.com/abhishektiwari/scholarimpact
+Tiwari, A. (2025). ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data. (v0.0.6). Zenodo. https://doi.org/10.5281/zenodo.17282762
 ```
 
 **MLA Format:**
 ```
-Tiwari, Abhishek. ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data. Version 0.0.1, 2025, https://github.com/abhishektiwari/scholarimpact.
+Tiwari, A. Scholarimpact: A Bibliometric Tool to Analyse, Visualise, and Share Your Research Impact, Output and Scholarly Influence Using Google Scholar and Openalex Data. v0.0.6, Zenodo, 7 Oct. 2025, https://doi.org/10.5281/zenodo.17282762.
 ```
