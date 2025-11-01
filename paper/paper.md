@@ -1,5 +1,5 @@
 ---
-title: 'ScholarImpact: A Python tool to analyse, visualise, and share your research impact, output and scholarly influence using bibliometric data'
+title: 'ScholarImpact: A Python tool to analyse, visualise, and share individual research impact, output and scholarly influence using bibliometric data'
 tags:
   - Python
   - bibliometrics
@@ -17,13 +17,15 @@ affiliations:
     index: 1
 date: 6 October 2025
 bibliography: paper.bib
+abstract: |
+  In this software paper we introduce ScholarImpact, an open-source Python tool empowering individual researchers to create personalized, deployable web dashboards showcasing their scholarly impact. The software generates shareable visualizations for grant applications and career development, democratizing sophisticated bibliometric analysis previously limited to institutional platforms.
 ---
 
 # Summary
 
-ScholarImpact is a Python-based bibliometric analysis tool designed to help researchers analyse, visualise, and share their research impact, output and scholarly influence. The software extracts initial data from a given Google Scholar profile and performs enrichment using OpenAlex [@priem2022openalex] and Altmetric [@adie2013altmetric] to provide multidimensional insights into citation patterns, geographic distribution, institutional reach, patent citations, and interdisciplinary influence. Unlike traditional citation metrics that provide only aggregate counts, ScholarImpact enables researchers to understand who is citing their work, where citations originate geographically and institutionally, and how their research impacts different domains and disciplines.
+[ScholarImpact](https://github.com/abhishektiwari/scholarimpact) is a Python-based bibliometric analysis tool designed to help researchers analyse, visualise, and share their research impact, output and scholarly influence. The software extracts initial data from a given Google Scholar profile and performs enrichment using OpenAlex [@priem2022openalex] and Altmetric [@adie2013altmetric] to provide multidimensional insights into citation patterns, geographic distribution, institutional reach, patent citations, and interdisciplinary influence. Unlike traditional citation metrics that provide only aggregate counts, ScholarImpact enables researchers to understand who is citing their work, where citations originate geographically and institutionally, and how their research impacts different domains and disciplines.
 
-The tool features an interactive Streamlit-based dashboard that visualizes key metrics including total citations, unique citing authors, institutional diversity, country distribution, temporal citation trends, research domain analysis, and alternative metrics such as patent citations and Wikipedia mentions. ScholarImpact is distributed as a pip-installable package with a command-line interface that automates data extraction, enrichment, and visualization, making sophisticated bibliometric analysis accessible to researchers without specialized technical expertise.
+The tool features an interactive Streamlit-based dashboard that visualizes key metrics including total citations, unique citing authors, institutional diversity, country distribution, temporal citation trends, research domain analysis, and alternative metrics such as patent citations and Wikipedia mentions. ScholarImpact is distributed as a [pip-installable package](https://pypi.org/project/scholarimpact/) with a command-line interface that automates data extraction, enrichment, and visualization, making sophisticated bibliometric analysis accessible to researchers without specialized technical expertise.
 
 # Statement of Need
 
@@ -40,7 +42,11 @@ ScholarImpact leverages the scholarly-python library [@cholewiak2021scholarly] f
 
 The tool fills a critical niche by democratizing access to sophisticated bibliometric analysis. By combining open data sources with an intuitive interface and deployment-ready architecture, ScholarImpact enables researchers across disciplines and career stages to gain actionable insights into their scholarly influence. The software has been used to analyze citation patterns across computer science, social sciences, and interdisciplinary research, demonstrating its flexibility and broad applicability.
 
-Future development roadmap includes enhanced citation network analysis, co-authorship visualization, comparative benchmarking against field averages, and integration with additional data sources such as ORCID [@haak2012orcid] and CrossRef [@hendricks2020crossref]. Community contributions are welcome via the project's GitHub repository.
+Future development roadmap includes enhanced citation network analysis, analysis for research software, co-authorship visualization, comparative benchmarking against field averages, and integration with additional data sources such as ORCID [@haak2012orcid] and CrossRef [@hendricks2020crossref]. Community contributions are welcome via the project's GitHub repository.
+
+# Availability
+
+ScholarImpact is distributed as a Python package on [PyPI](https://pypi.org/project/scholarimpact/), with the source code, testing modules, and a standalone script available under an MIT license through the [GitHub](https://github.com/abhishektiwari/scholarimpact) repository. A working demo of the deployed Streamlit-based dashboard can be found [here](https://scholarimpact.d3ml.org/).
 
 # Acknowledgements
 

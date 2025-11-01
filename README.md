@@ -425,7 +425,7 @@ If you use ScholarImpact in your research, please cite it as:
 ```bibtex
 @software{tiwari_2025_17282762,
   author       = {Tiwari, Abhishek},
-  title        = {ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data},
+  title        = {ScholarImpact: A Python tool to analyse, visualise, and share individual research impact, output and scholarly influence using bibliometric data},
   month        = oct,
   year         = 2025,
   publisher    = {Zenodo},
@@ -436,10 +436,10 @@ If you use ScholarImpact in your research, please cite it as:
 
 **APA Format:**
 ```
-Tiwari, A. (2025). ScholarImpact: A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data. (v0.0.6). Zenodo. https://doi.org/10.5281/zenodo.17282708
+Tiwari, A. (2025). ScholarImpact: A Python tool to analyse, visualise, and share individual research impact, output and scholarly influence using bibliometric data. Zenodo. https://doi.org/10.5281/zenodo.17282708
 ```
 
 **MLA Format:**
 ```
-Tiwari, A. Scholarimpact: A Bibliometric Tool to Analyse, Visualise, and Share Your Research Impact, Output and Scholarly Influence Using Google Scholar and Openalex Data. v0.0.6, Zenodo, 7 Oct. 2025, https://doi.org/10.5281/zenodo.17282708.
+Tiwari, A. ScholarImpact: A Python tool to analyse, visualise, and share individual research impact, output and scholarly influence using bibliometric data. Zenodo, 7 Oct. 2025, https://doi.org/10.5281/zenodo.17282708.
 ```
