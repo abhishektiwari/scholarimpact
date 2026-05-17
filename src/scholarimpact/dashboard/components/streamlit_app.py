@@ -179,6 +179,18 @@ class StreamlitAppComponent(BaseComponent):
                 st.session_state.selected_article_index = current_selection_index
                 st.session_state.selected_article_slug = None
 
+            # ScholarImpact footer
+            st.sidebar.markdown("### :material/school: ScholarImpact")
+            st.sidebar.markdown(
+                "[Create your own  →](https://github.com/abhishektiwari/scholarimpact) ScholarImpact Dashboard"
+            )
+
+            # Attribution section
+            st.sidebar.markdown("### :material/attribution: Attribution")
+            st.sidebar.markdown(
+                "Data sourced from Google Scholar, OpenAlex, and Altmetric.com for personal and fair usage."
+            )
+
             # Display Research Interests after publication selection (exact match to original)
             if data["author"].get("interests"):
                 st.sidebar.markdown("### Research Interests")
@@ -252,10 +264,6 @@ class StreamlitAppComponent(BaseComponent):
 
         with col4:
             st.metric("i10-index", author_data.get("i10index", 0))
-
-        # Attribution section
-        st.sidebar.markdown("### :material/attribution: Attribution")
-        st.sidebar.markdown("Data sourced from Google Scholar, OpenAlex, and Altmetric.com for personal and fair usage.", )
 
         # Interests (only if show_interests is True)
         if show_interests and author_data.get("interests"):
@@ -664,9 +672,40 @@ class StreamlitAppComponent(BaseComponent):
         elif is_top_10_percent:
             badges += " :material/social_leaderboard: **TOP 10%**"
 
-        # Generate main insight
-        if google_scholar_url:
-            insight = f"### {title} [→]({google_scholar_url})\n\n"
+        # Generate main insight with links
+        links = []
+
+        # Extract openalex_ids data
+        openalex_ids = pub_data.get("openalex_ids")
+        openalex_doi_url = ""
+        openalex_url = ""
+
+        if openalex_ids:
+            if isinstance(openalex_ids, dict):
+                openalex_doi_url = openalex_ids.get("doi", "")
+                openalex_url = openalex_ids.get("openalex", "")
+            else:
+                openalex_url = openalex_ids
+
+        # First link: Article icon - link to DOI (from openalex_ids) or Google Scholar
+        if openalex_doi_url:
+            links.append(f"[:material/article:]({openalex_doi_url})")
+        elif google_scholar_url:
+            links.append(f"[:material/article:]({google_scholar_url})")
+
+        # Second link: Cited by icon - link to citedby_url if available
+        citedby_url = pub_data.get("citedby_url")
+        if citedby_url:
+            links.append(f"[:material/school:]({citedby_url})")
+
+        # Third link: OpenAlex icon - link to openalex URL
+        if openalex_url:
+            links.append(f"[:material/lock_open_right:]({openalex_url})")
+
+        # Build the h3 with all available links on same line
+        links_str = " ".join(links)
+        if links_str:
+            insight = f"### {title} {links_str}\n\n"
         else:
             insight = f"### {title}\n\n"
 
@@ -689,8 +728,21 @@ class StreamlitAppComponent(BaseComponent):
             ):
                 insight += " (with geographic locations traced through author affiliations)"
 
-        insight += ".\n\n"
+        insight += ". "
 
+        # Add Field-Weighted Citation Impact (FWCI) if available
+        openalex_fwci = pub_data.get("openalex_fwci")
+        if openalex_fwci and isinstance(openalex_fwci, (int, float)) and openalex_fwci > 1:
+            insight += f"Compared to other publications in the same field, this publication has received approximately **{openalex_fwci:.2f}x** more citations than average. "
+
+        # Add percentile information if available
+        field = pub_data.get("openalex_field", "its field")
+        if is_top_1_percent:
+            insight += f"This work is in the **top 1%** percentile in the **{field}** field."
+        elif is_top_10_percent:
+            insight += f"This work is in the **top 10%** percentile in the **{field}** field."
+
+        insight += "\n\n"
         return insight
 
     def _analyze_citing_institutions(self, pub_data: pd.Series, data_dir: str) -> Dict[str, int]:
@@ -1501,7 +1553,7 @@ class StreamlitAppComponent(BaseComponent):
             # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
             if 'openalex_ids' in pub_data:
                 st.markdown("#### Altmetric Attention")
-                st.info("No Altmetric data available for this publication.")
+                st.warning("No Altmetric data available for this publication.")
 
 
 # Register component
