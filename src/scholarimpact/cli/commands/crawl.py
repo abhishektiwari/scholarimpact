@@ -10,7 +10,7 @@ from ...core.crawler import CitationCrawler
 
 @click.command(name="crawl-citations")
 @click.argument("author_json")
-@click.option("--openalex-email", help="OpenAlex email for enhanced data")
+@click.option("--openalex-api-key", help="OpenAlex API key (enables OpenAlex enrichment)")
 @click.option("--max-citations", type=int, help="Maximum citations per paper")
 @click.option(
     "--delay-min", default=5.0, type=float, help="Minimum delay between requests (default: 5.0)"
@@ -21,7 +21,7 @@ from ...core.crawler import CitationCrawler
 @click.option("--output-dir", help="Output directory (defaults to author.json directory)")
 def crawl_citations(
     author_json,
-    openalex_email,
+    openalex_api_key,
     max_citations,
     delay_min,
     delay_max,
@@ -56,7 +56,7 @@ def crawl_citations(
 
     # Initialize crawler
     delay_range = (delay_min, delay_max)
-    crawler = CitationCrawler(delay_range=delay_range, openalex_email=openalex_email)
+    crawler = CitationCrawler(delay_range=delay_range, openalex_api_key=openalex_api_key)
 
     # Process each article
     processed = 0

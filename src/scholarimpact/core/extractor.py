@@ -11,6 +11,7 @@ import os
 import time
 from datetime import datetime
 from typing import Dict, List, Optional
+from urllib.parse import quote_plus
 
 import pyalex
 import requests
@@ -23,30 +24,35 @@ logger = logging.getLogger(__name__)
 class AuthorExtractor:
     """Extract author data from Google Scholar."""
 
-    def __init__(self, delay=2, use_openalex=True, openalex_email=None, use_altmetric=True):
+    def __init__(self, delay=2, use_openalex=True, openalex_api_key=None, use_altmetric=True, altmetric_api_key=None):
         """Initialize the extractor.
 
         Args:
             delay: Delay between requests in seconds
-            use_openalex: Whether to use OpenAlex enrichment (default: True)
-            openalex_email: Email for OpenAlex API (optional, for higher rate limits)
-            use_altmetric: Whether to use Altmetric enrichment (default: True, requires OpenAlex)
+            use_openalex: Whether to use OpenAlex enrichment (requires API key)
+            openalex_api_key: API key for OpenAlex API (required to use OpenAlex)
+            use_altmetric: Whether to use Altmetric enrichment (requires OpenAlex and Altmetric API key)
+            altmetric_api_key: API key for Altmetric (required to use Altmetric)
         """
         self.delay = delay
         self.use_openalex = use_openalex
-        self.openalex_email = openalex_email
+        self.openalex_api_key = openalex_api_key
         self.use_altmetric = use_altmetric and use_openalex  # Altmetric requires OpenAlex
-        
+        self.altmetric_api_key = altmetric_api_key
+
         # Configure pyalex if OpenAlex is enabled
         if use_openalex:
-            if openalex_email:
-                pyalex.config.email = openalex_email
-                logger.info(f"OpenAlex configured with email: {openalex_email}")
+            if openalex_api_key:
+                pyalex.config.api_key = openalex_api_key
+                logger.info("OpenAlex configured with API key")
             else:
                 logger.info("OpenAlex enabled with default rate limits")
-        
+
         if self.use_altmetric:
-            logger.info("Altmetric enrichment enabled")
+            if altmetric_api_key:
+                logger.info("Altmetric enrichment enabled with API key")
+            else:
+                logger.info("Altmetric enrichment enabled")
 
     def extract(self, author_id, max_papers=None, output_file=None, output_dir="data"):
         """Extract author publications from Google Scholar.
@@ -161,7 +167,7 @@ class AuthorExtractor:
                         
                         # Enrich with Altmetric data if enabled and OpenAlex found identifiers
                         if self.use_altmetric and 'openalex_ids' in result_record:
-                            altmetric_data = self._enrich_with_altmetric(result_record['openalex_ids'])
+                            altmetric_data = self._enrich_with_altmetric(result_record['openalex_ids'], self.altmetric_api_key)
                             if altmetric_data:
                                 result_record.update(altmetric_data)
 
@@ -207,11 +213,11 @@ class AuthorExtractor:
     
     def _enrich_with_openalex(self, title: str, year: str) -> Optional[Dict]:
         """Enrich publication data with OpenAlex information.
-        
+
         Args:
             title: Publication title
             year: Publication year
-            
+
         Returns:
             Dictionary with OpenAlex data or None if not found
         """
@@ -220,23 +226,40 @@ class AuthorExtractor:
             search_query = f'"{title}"'
             if year and year != "Unknown":
                 search_query += f' AND publication_year:{year}'
-            
+
             # Use pyalex to search
-            works = Works().filter(title_and_abstract={"search": title}).get()
-            
+            works = None
+            try:
+                # Try title and abstract search first
+                works = Works().filter(title_and_abstract={"search": title}).get()
+            except Exception as e:
+                logger.info(f"Title and abstract search failed for '{title}': {e}")
+                # Fallback to direct ti
+                # tle-only search
+                try:
+                    encoded_title = quote_plus(title, safe=',')
+                    url = f"https://api.openalex.org/works?page=1&sort=relevance_score:desc&per_page=10&search.title={encoded_title}&api_key={self.openalex_api_key}"
+                    logger.info(f"OpenAlex API (fallback): GET {url}")
+                    response = requests.get(url, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+                    works = data.get("results", [])
+                except Exception as fallback_e:
+                    logger.info(f"Direct API search also failed for '{title}': {fallback_e}")
+
             if not works or len(works) == 0:
-                logger.debug(f"No OpenAlex match found for: {title}")
+                logger.info(f"No OpenAlex match found for: {title}")
                 return None
-            
+
             # Get the best match (first result)
             work = works[0]
-            
+
             # Extract relevant fields with openalex_ prefix
             openalex_data = {
                 "openalex_ids": work.get("ids", {}),  # Contains openalex, doi, mag, pmid, etc.
                 "openalex_type": work.get("type"),
                 "openalex_citation_normalized_percentile": work.get("citation_normalized_percentile"),
-                "openalex_cited_by_percentile_year": work.get("cited_by_percentile_year", {}).get("value") if work.get("cited_by_percentile_year") else None,
+                "openalex_cited_by_percentile_year": work.get("cited_by_percentile_year", {}).get("max") if work.get("cited_by_percentile_year") else None,
                 "openalex_fwci": work.get("fwci"),  # Field-Weighted Citation Impact
                 "openalex_cited_by_count": work.get("cited_by_count"),
                 "openalex_primary_topic": work.get("primary_topic", {}).get("display_name") if work.get("primary_topic") else None,
@@ -244,33 +267,34 @@ class AuthorExtractor:
                 "openalex_field": work.get("primary_topic", {}).get("field", {}).get("display_name") if work.get("primary_topic") and work.get("primary_topic").get("field") else None,
                 "openalex_subfield": work.get("primary_topic", {}).get("subfield", {}).get("display_name") if work.get("primary_topic") and work.get("primary_topic").get("subfield") else None,
             }
-            
+
             # Clean up None values
             openalex_data = {k: v for k, v in openalex_data.items() if v is not None}
-            
+
             logger.debug(f"OpenAlex enrichment successful for: {title}")
             return openalex_data
-            
+
         except Exception as e:
-            logger.warning(f"Error enriching with OpenAlex for '{title}': {e}")
+            logger.info(f"Error enriching with OpenAlex for '{title}': {e}")
             return None
     
-    def _enrich_with_altmetric(self, ids: Dict) -> Optional[Dict]:
+    def _enrich_with_altmetric(self, ids: Dict, api_key: Optional[str] = None) -> Optional[Dict]:
         """Enrich publication data with Altmetric information.
-        
+
         Args:
             ids: Dictionary of identifiers from OpenAlex (doi, pmid, etc.)
-            
+            api_key: Optional API key for Altmetric API
+
         Returns:
             Dictionary with Altmetric data or None if not found
         """
         if not ids:
             return None
-        
+
         # Try DOI first, then PMID
         doi = ids.get('doi', '').replace('https://doi.org/', '') if ids.get('doi') else None
         pmid = ids.get('pmid', '').replace('https://pubmed.ncbi.nlm.nih.gov/', '') if ids.get('pmid') else None
-        
+
         altmetric_url = None
         if doi:
             altmetric_url = f"https://api.altmetric.com/v1/doi/{doi}"
@@ -278,13 +302,17 @@ class AuthorExtractor:
             altmetric_url = f"https://api.altmetric.com/v1/pmid/{pmid}"
         else:
             return None
-        
+
+        # Add API key to URL if provided
+        if api_key:
+            altmetric_url = f"{altmetric_url}?key={api_key}"
+
         try:
             # Make request to Altmetric API
             response = requests.get(altmetric_url, timeout=10)
             
             if response.status_code == 404:
-                logger.debug(f"No Altmetric data found for DOI: {doi} or PMID: {pmid}")
+                logger.info(f"No Altmetric data found for DOI: {doi} or PMID: {pmid}")
                 return None
             
             response.raise_for_status()

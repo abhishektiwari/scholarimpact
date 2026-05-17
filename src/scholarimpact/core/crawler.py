@@ -13,10 +13,11 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, quote_plus, urljoin, urlparse
 
 import pandas as pd
 import pyalex
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
@@ -41,10 +42,18 @@ class CitationCrawler:
         headless=False,
         delay_range=(5, 10),
         use_openalex=True,
-        openalex_email=None,
+        openalex_api_key=None,
         use_scholar_fallback=True,
     ):
-        """Initialize the crawler with Chrome driver."""
+        """Initialize the crawler with Chrome driver.
+
+        Args:
+            headless: Run browser in headless mode
+            delay_range: Tuple of (min, max) seconds delay between requests
+            use_openalex: Whether to use OpenAlex enrichment (requires API key)
+            openalex_api_key: API key for OpenAlex (required to use OpenAlex)
+            use_scholar_fallback: Whether to fall back to Scholar profile extraction
+        """
         self.driver = None
         self.headless = headless
         self.delay_range = delay_range
@@ -52,15 +61,16 @@ class CitationCrawler:
         self.cites_id = None
         self.use_openalex = use_openalex
         self.use_scholar_fallback = use_scholar_fallback
+        self.openalex_api_key = openalex_api_key
 
         # Configure PyAlex
         if use_openalex:
-            if openalex_email:
-                pyalex.config.email = openalex_email
-                logger.info(f"Configured OpenAlex with email: {openalex_email}")
+            if openalex_api_key:
+                pyalex.config.api_key = openalex_api_key
+                logger.info("Configured OpenAlex with API key")
             else:
                 logger.info(
-                    "Using OpenAlex without email (consider adding --openalex-email for higher rate limits)"
+                    "Using OpenAlex without API key (consider adding --openalex-api-key for higher rate limits)"
                 )
 
     def setup_driver(self):
@@ -560,17 +570,27 @@ class CitationCrawler:
         title = citation_data["citing_paper_title"]
         try:
             # Clean the title - remove commas which cause issues with OpenAlex API
-            clean_title = title.replace(",", "").strip()
-
-            if clean_title != title:
-                logger.debug(f"Cleaned title for OpenAlex search: '{title}' -> '{clean_title}'")
-
-            # Use exact title search with title.search filter
-            # This provides more accurate matching
-            works = pyalex.Works().filter(**{"title.search": clean_title}).get()
+            # Try title search with fallback
+            works = None
+            try:
+                # Use title-only search first
+                works = pyalex.Works().filter(title={"search": title}).get()
+            except Exception as e:
+                logger.info(f"Title search failed for '{title}': {e}")
+                # Fallback to direct title_and_abstract search
+                try:
+                    encoded_title = quote_plus(title, safe=',')
+                    url = f"https://api.openalex.org/works?page=1&sort=relevance_score:desc&per_page=10&search.title_and_abstract={encoded_title}&api_key={self.openalex_api_key}"
+                    logger.info(f"OpenAlex API (fallback): GET {url}")
+                    response = requests.get(url, timeout=10)
+                    response.raise_for_status()
+                    data = response.json()
+                    works = data.get("results", [])
+                except Exception as fallback_e:
+                    logger.info(f"Direct API search also failed for '{title}': {fallback_e}")
 
             if not works:
-                logger.debug(f"No OpenAlex results found for title: {clean_title}")
+                logger.info(f"No OpenAlex results found for title: {title}")
                 return citation_data, []
 
             # Get the first (most relevant) result

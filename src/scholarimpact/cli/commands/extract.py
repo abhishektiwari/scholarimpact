@@ -13,39 +13,39 @@ from ...core.extractor import AuthorExtractor
 @click.option("--output-dir", default="./data", help="Output directory")
 @click.option("--output-file", help="Output file path (overrides output-dir)")
 @click.option("--delay", default=2.0, type=float, help="Delay between requests")
-@click.option("--use-openalex/--no-openalex", default=True, help="Enable OpenAlex enrichment (default: enabled)")
-@click.option("--openalex-email", help="Email for OpenAlex API (optional, for higher rate limits)")
-@click.option("--use-altmetric/--no-altmetric", default=True, help="Enable Altmetric enrichment (requires OpenAlex, default: enabled)")
-def extract_author(scholar_id, max_papers, output_dir, output_file, delay, use_openalex, openalex_email, use_altmetric):
+@click.option("--openalex-api-key", help="API key for OpenAlex (enables OpenAlex enrichment)")
+@click.option("--altmetric-api-key", help="API key for Altmetric (enables Altmetric enrichment)")
+def extract_author(scholar_id, max_papers, output_dir, output_file, delay, openalex_api_key, altmetric_api_key):
     """Extract author publications from Google Scholar."""
 
     click.echo(f"Extracting author data for Scholar ID: {scholar_id}")
-    
-    # Validate Altmetric dependency on OpenAlex
-    if use_altmetric and not use_openalex:
-        click.echo("Warning: Altmetric enrichment requires OpenAlex. Disabling Altmetric.", err=True)
-        use_altmetric = False
-    
+
+    # OpenAlex is enabled only if API key is provided
+    use_openalex = bool(openalex_api_key)
+
+    # Altmetric is enabled only if API key is provided AND OpenAlex is enabled
+    use_altmetric = bool(altmetric_api_key) and use_openalex
+
     if use_openalex:
-        if openalex_email:
-            click.echo(f"OpenAlex enrichment enabled with email: {openalex_email}")
-        else:
-            click.echo("OpenAlex enrichment enabled (using default rate limits)")
+        click.echo("OpenAlex enrichment enabled with API key")
     else:
         click.echo("OpenAlex enrichment disabled")
-    
+
     if use_altmetric:
-        click.echo("Altmetric enrichment enabled")
+        click.echo("Altmetric enrichment enabled with API key")
+    elif altmetric_api_key and not use_openalex:
+        click.echo("Warning: Altmetric enrichment requires OpenAlex API key. Disabling Altmetric.", err=True)
 
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
 
     # Initialize extractor
     extractor = AuthorExtractor(
-        delay=delay, 
+        delay=delay,
         use_openalex=use_openalex,
-        openalex_email=openalex_email if use_openalex else None,
-        use_altmetric=use_altmetric
+        openalex_api_key=openalex_api_key,
+        use_altmetric=use_altmetric,
+        altmetric_api_key=altmetric_api_key if use_altmetric else None
     )
 
     try:
