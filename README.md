@@ -1,6 +1,16 @@
 # _ScholarImpact_
 A bibliometric tool to analyse, visualise, and share your research impact, output and scholarly influence using Google Scholar and OpenAlex data.
 
+![GitHub Release](https://img.shields.io/github/v/release/abhishektiwari/scholarimpact)
+![GitHub Actions Test Workflow Status](https://img.shields.io/github/actions/workflow/status/abhishektiwari/scholarimpact/test.yml?label=tests)
+![PyPI - Version](https://img.shields.io/pypi/v/scholarimpact)
+![Python Wheels](https://img.shields.io/pypi/wheel/scholarimpact)
+![Python Versions](https://img.shields.io/pypi/pyversions/scholarimpact?logo=python&logoColor=white)
+![GitHub last commit](https://img.shields.io/github/last-commit/abhishektiwari/scholarimpact)
+![PyPI - Status](https://img.shields.io/pypi/status/scholarimpact)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/abhishektiwari/scholarimpact/total?label=GitHub%20Downloads)
+![PyPI Downloads](https://img.shields.io/pepy/dt/scholarimpact?label=PyPI%20Downloads)
+
 For each article under your Google Scholar Profile, **_ScholarImpact_**: (1) total number of citations, (2) number of unique authors who have cited the article, (3) number of countries from which citations originate, (4) number of institutions from which citations originate, (5) geographic distribution of citations, (6) citation trends over time, (7) research domain analysis, (8) interdisciplinary impact Metrics including Patents and Wikipedia mentions (9) Alternative metrics.
 
 ![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/example-dashboard-v4.png)
@@ -71,10 +81,10 @@ pip install scholarimpact
 ## Caution
 This system is designed for academic research purposes and personal usage. Please use responsibly and in accordance with Google Scholar, OpenAlex, Altmetric terms of services with appropriate attribution.
 
-## Breaking Changes (v0.0.10+)
+## Breaking Changes (v0.0.13+)
 
 ### API Key Requirements
-As of version v0.0.10+, both OpenAlex and Altmetric now require API keys. This is a breaking change from previous versions.
+As of version v0.0.13+, both OpenAlex and Altmetric now require API keys. This is a breaking change from previous versions.
 
 #### What Changed:
 
