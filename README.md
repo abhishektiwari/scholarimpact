@@ -88,6 +88,44 @@ As of version v0.0.10, both OpenAlex and Altmetric now require API keys. This is
 - **Current:** Altmetric requires API key with `--altmetric-api-key` option
 - **Impact:** Altmetric enrichment now requires an explicit API key
 
+## Getting API Keys
+
+### OpenAlex API Key
+
+OpenAlex data is and will remain available at no cost. The API is a freemium service:
+- **$1 free credit daily** - sufficient for most research use cases
+- **Pay as you go** after daily limit - only charged for usage beyond free tier
+- **No API key required** for the free tier (limited rate)
+- **Free API key** - create an account in 30 seconds for higher rate limits
+
+**To get your OpenAlex API key:**
+1. Go to [openalex.org/settings/api](https://openalex.org/settings/api)
+2. Create a free account (takes 30 seconds)
+3. Copy your API key from the settings page
+4. Use it with the `--openalex-api-key` flag in ScholarImpact commands
+
+**Documentation:** [OpenAlex API Authentication](https://developers.openalex.org/api-reference/authentication)
+
+### Altmetric API Key
+
+Altmetric offers free access for university scientometric researchers through their Details Page API - Counts Only, which is optimized for querying publication identifiers.
+
+**Features:**
+- Query by DOI, PMID, or other identifiers
+- Returns publication attention metrics (citations, social media mentions, etc.)
+- Free access available for university researchers
+
+**To get Altmetric API key:**
+1. Visit [Altmetric Research Access](https://www.altmetric.com/our-audience/researchers/research-access/)
+2. Complete the researcher access request form
+3. Specify your institution and research project
+4. Altmetric will provide your API key
+5. Use it with the `--altmetric-api-key` flag in ScholarImpact commands
+
+**Documentation:** [Altmetric Details Page API - Counts Only](https://help.altmetric.com/en/articles/9806465)
+
+**Note:** Free university researcher access is available through the research access program. Contact Altmetric for details on eligibility and access.
+
 ## Step-by-Step Guide
 
 ### Option 1: For Deployment (Recommended)
