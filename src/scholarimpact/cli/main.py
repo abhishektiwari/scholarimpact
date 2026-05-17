@@ -41,13 +41,14 @@ cli.add_command(generate.generate_dashboard)
 # Quick start command
 @cli.command()
 @click.argument("scholar_id")
-@click.option("--openalex-email", help="OpenAlex email for enhanced data")
+@click.option("--openalex-api-key", help="OpenAlex API key (enables OpenAlex enrichment)")
+@click.option("--altmetric-api-key", help="Altmetric API key (enables Altmetric enrichment)")
 @click.option("--output-dir", default="./data", help="Output directory")
 @click.option(
     "--launch-dashboard/--no-dashboard", default=True, help="Launch dashboard after analysis"
 )
 @click.pass_context
-def quick_start(ctx, scholar_id, openalex_email, output_dir, launch_dashboard):
+def quick_start(ctx, scholar_id, openalex_api_key, altmetric_api_key, output_dir, launch_dashboard):
     """Complete analysis pipeline from Scholar ID to dashboard."""
     click.echo(f"Starting complete analysis for Scholar ID: {scholar_id}")
 
@@ -56,14 +57,14 @@ def quick_start(ctx, scholar_id, openalex_email, output_dir, launch_dashboard):
 
     # Extract author data
     click.echo("1. Extracting author publications...")
-    ctx.invoke(extract.extract_author, scholar_id=scholar_id, output_dir=output_dir)
+    ctx.invoke(extract.extract_author, scholar_id=scholar_id, output_dir=output_dir, openalex_api_key=openalex_api_key, altmetric_api_key=altmetric_api_key)
 
     # Crawl citations
     click.echo("2. Crawling citations...")
     ctx.invoke(
         crawl.crawl_citations,
         author_json=f"{output_dir}/author.json",
-        openalex_email=openalex_email,
+        openalex_api_key=openalex_api_key,
     )
 
     # Launch dashboard

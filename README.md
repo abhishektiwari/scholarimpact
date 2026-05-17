@@ -71,6 +71,23 @@ pip install scholarimpact
 ## Caution
 This system is designed for academic research purposes and personal usage. Please use responsibly and in accordance with Google Scholar, OpenAlex, Altmetric terms of services with appropriate attribution.
 
+## Breaking Changes (v0.0.10+)
+
+### API Key Requirements
+As of version v0.0.10, both OpenAlex and Altmetric now require API keys. This is a breaking change from previous versions.
+
+#### What Changed:
+
+**OpenAlex:**
+- **Previous:** Email-based authentication with `--openalex-email` flag
+- **Current:** API key-based authentication with `--openalex-api-key` option
+- **Impact:** OpenAlex enrichment now requires an API key
+
+**Altmetric:**
+- **Previous:** Altmetric worked with just `--use-altmetric` flag (public API)
+- **Current:** Altmetric requires API key with `--altmetric-api-key` option
+- **Impact:** Altmetric enrichment now requires an explicit API key
+
 ## Step-by-Step Guide
 
 ### Option 1: For Deployment (Recommended)
@@ -92,23 +109,23 @@ This creates a complete project structure with `app.py`, `requirements.txt`, `.s
 #### Step 2: Extract Author Publications
 
 ```bash
-# Extract your publications from Google Scholar (OpenAlex and Altmetric enabled by default)
+# Extract your publications from Google Scholar
 scholarimpact extract-author "YOUR_SCHOLAR_USER_ID"
 
-# With email for higher OpenAlex rate limits (recommended)
-scholarimpact extract-author "YOUR_SCHOLAR_USER_ID" --openalex-email your.email@example.com
+# With OpenAlex API key (required for OpenAlex enrichment and Altmetric)
+scholarimpact extract-author "YOUR_SCHOLAR_USER_ID" --openalex-api-key YOUR_API_KEY
 
 # Or use full URL
-scholarimpact extract-author "https://scholar.google.com/citations?user=YOUR_SCHOLAR_USER_ID"
+scholarimpact extract-author "https://scholar.google.com/citations?user=YOUR_SCHOLAR_USER_ID" --openalex-api-key YOUR_API_KEY
 ```
 
-This creates `data/author.json` with your publication list, enriched with OpenAlex and Altmetric metrics by default.
+This creates `data/author.json` with your publication list. Add `--openalex-api-key` to enrich with OpenAlex and Altmetric metrics (API key required).
 
 #### Step 3: Crawl Citation Data
 
 ```bash
-# Crawl citations with OpenAlex enrichment
-scholarimpact crawl-citations data/author.json --openalex-email your.email@example.com
+# Crawl citations with OpenAlex enrichment (API key required)
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY
 ```
 
 This creates `data/cites-{ID}.json` files for each publication.
@@ -155,6 +172,8 @@ Your repository should contain:
 my-research-dashboard/
 ├── app.py                    # Main dashboard file
 ├── requirements.txt          # Python dependencies
+├── Dockerfile                # Docker container configuration
+├── docker-compose.yml        # Docker Compose orchestration (optional)
 ├── .streamlit/
 │   └── config.toml          # Streamlit configuration
 ├── static/                  # Static assets (fonts from scholarimpact/assets/fonts)
@@ -170,13 +189,44 @@ my-research-dashboard/
     └── cites-*.json         # Citation data files
 ```
 
-#### Step 8: Update Data
+#### Step 8: Docker Deployment (Alternative to Streamlit Cloud)
+
+The generated project includes `Dockerfile` and `docker-compose.yml` for containerized deployment:
+
+**Using Docker Compose (Recommended):**
+```bash
+# Build and run with Docker Compose
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the service
+docker-compose down
+```
+
+**Using Docker directly:**
+```bash
+# Build the image
+docker build -t scholarimpact-dashboard .
+
+# Run the container
+docker run -p 8501:8501 scholarimpact-dashboard
+
+# Or run in background
+docker run -d -p 8501:8501 scholarimpact-dashboard
+```
+
+Access your dashboard at `http://localhost:8501`
+
+#### Step 9: Update Data
 
 To update citation data:
 
 1. Re-run step-2 and step-3 to update data files
 2. Commit changes and push them to your GitHub repository
-3. Streamlit Cloud will automatically detect changes and restart the app
+3. For Streamlit Cloud: automatic restart on push
+4. For Docker: rebuild and redeploy the container
 
 #### Tips for Streamlit Cloud Deployment
 
@@ -184,6 +234,13 @@ To update citation data:
 - Use `.gitignore` to exclude unnecessary files
 - Set secrets in Streamlit Cloud settings if needed
 - Monitor app logs in Streamlit Cloud dashboard for debugging
+
+#### Tips for Docker Deployment
+
+- Resource limits are configured in `docker-compose.yml` (1 CPU, 512MB RAM)
+- Use environment variables for configuration (see `docker-compose.yml`)
+- For production, update the `x-ports` section with your domain
+- Mount data volume for persistent storage: `docker run -v ./data:/app/data -p 8501:8501 scholarimpact-dashboard`
 
 ### Option 2: For Quick Local Testing
 
@@ -199,8 +256,8 @@ scholarimpact extract-author "YOUR_SCHOLAR_USER_ID"
 #### Step 2: Crawl Citation Data
 
 ```bash
-# Crawl citations
-scholarimpact crawl-citations data/author.json --openalex-email your.email@example.com
+# Crawl citations with OpenAlex enrichment (API key required)
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY
 ```
 
 #### Step 3: Launch Dashboard
@@ -232,9 +289,8 @@ Options:
 | `--delay X` | float | 2.0 | Delay between requests in seconds |
 | `--output-dir DIR` | str | ./data | Output directory for author.json |
 | `--output-file FILE` | str | None | Custom output file path (overrides output-dir) |
-| `--use-openalex/--no-openalex` | flag | True | Enable OpenAlex enrichment (default: enabled) |
-| `--openalex-email EMAIL` | str | None | Email for OpenAlex API (optional, for higher rate limits) |
-| `--use-altmetric/--no-altmetric` | flag | True | Enable Altmetric enrichment (requires OpenAlex, default: enabled) |
+| `--openalex-api-key KEY` | str | None | API key for OpenAlex (enables OpenAlex enrichment) |
+| `--altmetric-api-key KEY` | str | None | API key for Altmetric (enables Altmetric enrichment) |
 
 OpenAlex enrichment adds (all fields prefixed with `openalex_`):
 - `openalex_ids`: Object containing all identifiers:
@@ -264,26 +320,23 @@ Altmetric enrichment adds (all fields prefixed with `altmetric_`):
 
 Examples:
 ```bash
-# Basic usage (OpenAlex and Altmetric enabled by default)
+# Basic usage (Google Scholar only, no enrichment)
 scholarimpact extract-author "ABC123DEF"
 
-# With email for higher OpenAlex rate limits
-scholarimpact extract-author "ABC123DEF" --openalex-email your.email@example.com
+# With OpenAlex API key for enrichment
+scholarimpact extract-author "ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY
 
-# Disable Altmetric enrichment (keep OpenAlex)
-scholarimpact extract-author "ABC123DEF" --no-altmetric
-
-# Disable all enrichment (Google Scholar only)
-scholarimpact extract-author "ABC123DEF" --no-openalex --no-altmetric
+# With both OpenAlex and Altmetric enrichment
+scholarimpact extract-author "ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY --altmetric-api-key YOUR_ALTMETRIC_KEY
 
 # Limit to first 20 papers with 3-second delays
-scholarimpact extract-author "ABC123DEF" --max-papers 20 --delay 3
+scholarimpact extract-author "ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY --max-papers 20 --delay 3
 
-# Custom output file with email for higher limits
-scholarimpact extract-author "ABC123DEF" --output-file data/my_author.json --openalex-email your.email@example.com
+# Custom output file with OpenAlex API key
+scholarimpact extract-author "ABC123DEF" --output-file data/my_author.json --openalex-api-key YOUR_OPENALEX_KEY
 
 # Full URL format
-scholarimpact extract-author "https://scholar.google.com/citations?user=ABC123DEF"
+scholarimpact extract-author "https://scholar.google.com/citations?user=ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY
 ```
 
 ### `scholarimpact crawl-citations` Command
@@ -300,7 +353,7 @@ Arguments:
 Options:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--openalex-email EMAIL` | str | None | Email for OpenAlex API (higher rate limits) |
+| `--openalex-api-key KEY` | str | None | API key for OpenAlex (required to use OpenAlex) |
 | `--max-citations N` | int | None | Maximum citations per paper |
 | `--delay-min X` | float | 5.0 | Minimum delay between requests (seconds) |
 | `--delay-max Y` | float | 10.0 | Maximum delay between requests (seconds) |
@@ -308,17 +361,17 @@ Options:
 
 Examples:
 ```bash
-# Basic usage with OpenAlex
-scholarimpact crawl-citations data/author.json --openalex-email me@university.edu
+# Basic usage with OpenAlex API key (required)
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY
 
 # Custom delays
-scholarimpact crawl-citations data/author.json --delay-min 3 --delay-max 8
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --delay-min 3 --delay-max 8
 
 # Custom output directory
-scholarimpact crawl-citations data/author.json --output-dir custom_data
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --output-dir custom_data
 
 # Limit citations per paper
-scholarimpact crawl-citations data/author.json --max-citations 100
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --max-citations 100
 ```
 
 ### `ScholarImpact` Command
@@ -365,25 +418,29 @@ Arguments:
 Options:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--openalex-email EMAIL` | str | None | OpenAlex email for enhanced data |
+| `--openalex-api-key KEY` | str | None | OpenAlex API key (enables OpenAlex enrichment) |
+| `--altmetric-api-key KEY` | str | None | Altmetric API key (enables Altmetric enrichment) |
 | `--output-dir DIR` | str | ./data | Output directory for all data |
 | `--launch-dashboard/--no-dashboard` | flag | True | Launch dashboard after analysis |
 
 Examples:
 ```bash
-# Complete pipeline with dashboard
-scholarimpact quick-start "ABC123DEF" --openalex-email me@university.edu
+# Complete pipeline with OpenAlex enrichment
+scholarimpact quick-start "ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY
+
+# Complete pipeline with both OpenAlex and Altmetric enrichment
+scholarimpact quick-start "ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY --altmetric-api-key YOUR_ALTMETRIC_KEY
 
 # Skip dashboard launch
 scholarimpact quick-start "ABC123DEF" --no-dashboard
 
-# Custom output directory
-scholarimpact quick-start "ABC123DEF" --output-dir results
+# Custom output directory with enrichment
+scholarimpact quick-start "ABC123DEF" --output-dir results --openalex-api-key YOUR_OPENALEX_KEY
 ```
 
 ### `scholarimpact generate-dashboard` Command
 
-Generate a standalone dashboard project for deployment to Streamlit Cloud:
+Generate a standalone dashboard project for deployment to Streamlit Cloud or Docker:
 
 ```bash
 scholarimpact generate-dashboard [OPTIONS]
@@ -412,9 +469,16 @@ scholarimpact generate-dashboard --data-dir ../citation_data --name app.py
 This command generates:
 
 - A dashboard Python file (default: `my_dashboard.py`)
+- `Dockerfile` for containerization (Python 3.13-slim base)
+- `docker-compose.yml` for orchestration with resource limits
 - `.streamlit/config.toml` with theme configuration
-- `requirements.txt` for deployment
+- `requirements.txt` for dependencies
 - `static` folder containing fonts used by default theme
+
+The generated project is ready for deployment to:
+- **Streamlit Cloud**: Push to GitHub and deploy via share.streamlit.io
+- **Docker**: Build and run locally or on any Docker-compatible server
+- **Docker Compose**: Orchestrate with resource limits and environment configuration
 
 ## Citation
 

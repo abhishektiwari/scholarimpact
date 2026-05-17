@@ -107,6 +107,70 @@ For custom fonts, use the font family name after placing files here.
 
     click.echo(f" Generated requirements.txt for deployment: {requirements_file}")
 
+    # Generate Dockerfile for containerization
+    dockerfile_content = """# app/Dockerfile
+FROM python:3.13-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \\
+    build-essential \\
+    curl \\
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy local files instead of cloning from git
+COPY requirements.txt .
+RUN pip3 install -r requirements.txt
+
+COPY . .
+
+EXPOSE 8501
+
+HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
+
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+"""
+
+    dockerfile = output_path / "Dockerfile"
+    with open(dockerfile, "w", encoding="utf-8") as f:
+        f.write(dockerfile_content)
+
+    click.echo(f" Generated Dockerfile for containerization: {dockerfile}")
+
+    # Generate docker-compose.yml for orchestration
+    compose_content = """version: '3.8'
+
+services:
+  web-scholarimpact-dashboard:
+    # Build an image from the Dockerfile in the current directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    image: scholarimpact-dashboard:latest
+    environment:
+      - ENV=production
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '1'
+          memory: 512M
+    x-ports:
+      - scholarimpact.d3ml.org:8501/https
+"""
+
+    compose_file = output_path / "docker-compose.yml"
+    with open(compose_file, "w", encoding="utf-8") as f:
+        f.write(compose_content)
+
+    click.echo(f" Generated docker-compose.yml for orchestration: {compose_file}")
+
     # Show available bundled assets
     assets = list_assets()
     if assets:
@@ -116,6 +180,13 @@ For custom fonts, use the font family name after placing files here.
     click.echo(f"\nDashboard setup complete!")
     click.echo(f"To run your dashboard:")
     click.echo(f"  python {name}")
+    click.echo(f"")
+    click.echo(f"Or with Docker Compose:")
+    click.echo(f"  docker-compose up -d")
+    click.echo(f"")
+    click.echo(f"Or with Docker:")
+    click.echo(f"  docker build -t scholarimpact-dashboard .")
+    click.echo(f"  docker run -p 8501:8501 scholarimpact-dashboard")
     click.echo(f"")
     click.echo(f"Or manually:")
     click.echo(f"  ScholarImpact --data-dir {data_dir}")

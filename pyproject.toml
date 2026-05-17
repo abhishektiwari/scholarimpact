@@ -9,7 +9,7 @@ description = "A bibliometric tool to analyse, visualise, and share your researc
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Abhishek Tiwari", email = "scholarimpact@abhishek-tiwari.com"}
+    {name = "Abhishek Tiwari", email = "abhishek@abhishek-tiwari.com"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -38,7 +38,7 @@ dependencies = [
     "beautifulsoup4>=4.11.0",
     "selenium>=4.10.0",
     "scholarly>=1.7.11",
-    "pyalex>=0.18",
+    "pyalex>=0.21",
     "pycountry>=22.0.0",
     "geopy>=2.4.1",
     "tqdm>=4.65.0",

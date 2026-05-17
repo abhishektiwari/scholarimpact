@@ -42,7 +42,7 @@ def create_dashboard(data_dir, **kwargs):
 
 
 # Quick start function
-def quick_analysis(scholar_id, openalex_email=None, launch_dashboard=True, data_dir="./data"):
+def quick_analysis(scholar_id, openalex_api_key=None, altmetric_api_key=None, launch_dashboard=True, data_dir="./data"):
     """Complete analysis pipeline from Scholar ID to dashboard."""
     import os
 
@@ -51,11 +51,11 @@ def quick_analysis(scholar_id, openalex_email=None, launch_dashboard=True, data_
 
     # Extract author data
     print(f"Extracting author data for {scholar_id}...")
-    author_data = extract_author(scholar_id, output_dir=data_dir)
+    author_data = extract_author(scholar_id, output_dir=data_dir, openalex_api_key=openalex_api_key, altmetric_api_key=altmetric_api_key)
 
     # Crawl citations
     print("Crawling citations...")
-    citation_data = crawl_citations(f"{data_dir}/author.json", openalex_email=openalex_email)
+    citation_data = crawl_citations(f"{data_dir}/author.json", openalex_api_key=openalex_api_key)
 
     # Create and optionally launch dashboard
     print("Creating dashboard...")
