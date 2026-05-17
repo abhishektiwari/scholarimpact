@@ -5,7 +5,7 @@ Main streamlit app component that replicates the exact original streamlit_app.py
 import json
 import os
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -577,6 +577,10 @@ class StreamlitAppComponent(BaseComponent):
         # All the visualization sections exactly as in original
         self._render_visualizations(pub_data, COLOR_PALETTE, data_dir, has_enhanced_geo_data)
 
+        # Top Citing Institutions by Ranking
+        st.markdown("---")
+        self._render_top_citing_institutions(pub_data, data_dir)
+
         # Detailed Citations Table
         st.markdown("---")
         st.markdown("### Detailed Citations Table")
@@ -613,6 +617,86 @@ class StreamlitAppComponent(BaseComponent):
             st.info(
                 "No detailed citation data available. Run the citation crawler to generate detailed citation information."
             )
+
+    def _render_top_citing_institutions(self, pub_data: pd.Series, data_dir: str):
+        """Render table of top citing institutions by Scimago ranking."""
+        cites_id = pub_data.get("cites_id", "")
+        if not cites_id:
+            return
+
+        # Get citations file
+        if "," in cites_id:
+            file_cites_id = cites_id.replace(",", "_")
+        else:
+            file_cites_id = cites_id
+
+        json_file = f"{data_dir}/cites-{file_cites_id}.json"
+        if not os.path.exists(json_file):
+            return
+
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                citations = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return
+
+        st.markdown("### Top Citing Institutions by Author Affiliation")
+
+        # Collect institutions and their citation counts
+        institution_citations = defaultdict(int)
+        institution_ranks = {}
+
+        for citation in citations:
+            citing_authors_details = citation.get("citing_authors_details", [])
+            for author in citing_authors_details:
+                if isinstance(author, dict):
+                    institution = author.get("institution_display_name")
+                    if institution and institution not in ["Unknown", ""]:
+                        institution_citations[institution] += 1
+
+                        # Get rank if available
+                        if institution not in institution_ranks:
+                            rank = author.get("institution_rank")
+                            institution_ranks[institution] = rank
+
+        if not institution_citations:
+            st.info("No institution data available.")
+            return
+
+        # Build table data with only ranked institutions
+        table_data = []
+        for institution, citations_count in institution_citations.items():
+            rank = institution_ranks.get(institution)
+            # Only include institutions with Scimago ranking
+            if rank:
+                table_data.append(
+                    {
+                        "Institution": institution,
+                        "Citations": citations_count,
+                        "Rank": rank,
+                    }
+                )
+
+        if not table_data:
+            st.info("No Scimago-ranked institutions citing this work.")
+            return
+
+        # Sort by rank (lower rank = better)
+        table_data.sort(key=lambda x: x["Rank"])
+
+        # Display as dataframe (Institution and Rank only)
+        df = pd.DataFrame(table_data)[["Institution", "Rank"]]
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Institution": st.column_config.TextColumn("Institution", width="large"),
+                "Rank": st.column_config.TextColumn("Scimago Rank", width="small"),
+            },
+        )
+
+        st.caption(f"Showing {len(table_data)} institutions citing this work ranked in Scimago research ranking.")
 
     def _generate_insight(self, pub_data: pd.Series) -> str:
         """Generate human-readable insight exactly as in original."""

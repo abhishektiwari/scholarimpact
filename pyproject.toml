@@ -45,6 +45,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+network = [
+    "networkx>=3.0.0",
+    "pyvis>=0.3.0",
+]
+
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
@@ -74,11 +79,12 @@ where = ["src"]
 scholarimpact = [
     "assets/**/*.toml",
     "assets/**/*.ttf",
-    "assets/**/*.otf", 
+    "assets/**/*.otf",
     "assets/**/*.woff",
     "assets/**/*.woff2",
     "assets/**/*.txt",
-    "assets/**/*.md"
+    "assets/**/*.md",
+    "data/**/*.csv"
 ]
 
 [tool.setuptools_scm]

@@ -1,5 +1,5 @@
 """CLI commands for ScholarImpact."""
 
-from . import crawl, dashboard, extract, generate
+from . import add_rankings, crawl, dashboard, extract, generate, list_articles
 
-__all__ = ["extract", "crawl", "dashboard", "generate"]
+__all__ = ["extract", "crawl", "list_articles", "add_rankings", "dashboard", "generate"]
