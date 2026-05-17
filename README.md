@@ -387,6 +387,41 @@ scholarimpact extract-author "ABC123DEF" --output-file data/my_author.json --ope
 scholarimpact extract-author "https://scholar.google.com/citations?user=ABC123DEF" --openalex-api-key YOUR_OPENALEX_KEY
 ```
 
+### `scholarimpact list-articles` Command
+
+List all articles from author.json with their cites_id and title:
+
+```bash
+scholarimpact list-articles [OPTIONS] AUTHOR_JSON
+```
+
+Arguments:
+- `AUTHOR_JSON`: Path to author.json file containing publications
+
+Options:
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--format FORMAT` | str | table | Output format: `table` or `json` |
+
+Examples:
+```bash
+# List articles in table format
+scholarimpact list-articles data/author.json
+
+# List articles in JSON format
+scholarimpact list-articles data/author.json --format json
+
+# Copy cites_id from table output and use it to crawl specific article
+scholarimpact crawl-citations data/author.json --cites-id "ABC123,XYZ789"
+```
+
+The table shows:
+- `#`: Article index (0-based)
+- `Cites ID`: Google Scholar citation ID (use with `--cites-id` flag)
+- `Title`: Article title
+- `Year`: Publication year
+- `Cit`: Total citations count
+
 ### `scholarimpact crawl-citations` Command
 
 Crawl citations with OpenAlex integration:
@@ -406,11 +441,48 @@ Options:
 | `--delay-min X` | float | 5.0 | Minimum delay between requests (seconds) |
 | `--delay-max Y` | float | 10.0 | Maximum delay between requests (seconds) |
 | `--output-dir DIR` | str | None | Output directory (defaults to author.json directory) |
+| `--cites-id CITES_ID` | str | None | Crawl only a specific article by cites_id (auto-enables `--force`) |
+| `--force` | flag | False | Force re-crawl of articles when citation counts don't match expectations |
+
+**Smart Skipping Logic:**
+
+The crawler compares citation counts in `author.json` with counts in the crawled citation files:
+
+1. **Citations match** (e.g., 10 in both):
+   - Skip by default
+   - Skip with `--force` (data is up to date)
+   - Message: `Citation count unchanged - 10 citations in author.json, 10 citations in file`
+
+2. **New citations found** (e.g., 4 in author.json, 3 in file):
+   - **Always crawl** to get the new citation (even without `--force`)
+   - Message: `Citation count increased - 4 citations in author.json, 3 in file (crawling to get new citations)`
+
+3. **File has more citations** (e.g., 3 in author.json, 4 in file) [unusual]:
+   - Skip by default
+   - Crawl with `--force` to refresh
+   - Message: `File has more citations - 3 in author.json, 4 in file (use --force to recrawl)`
+
+**Special behavior with `--cites-id`:**
+- Always **crawls** the specified article (ignores existing file)
+- Automatically enables `--force` mode
+- Gets fresh citation data regardless of file existence or citation count
+- Useful for testing, re-crawling specific articles, or updating individual articles
+
+**When to use `--force`:**
+- Re-crawl all articles when citation counts seem out of sync
+- Refresh corrupted citation files
+- Override automatic skipping for articles with matching counts (if you want fresh data for all articles)
 
 Examples:
 ```bash
-# Basic usage with OpenAlex API key (required)
+# Basic usage - skips articles with matching citation counts, crawls new citations
 scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY
+
+# Crawl only a single article (always gets fresh data, auto-enables force)
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --cites-id "ABC123,XYZ789"
+
+# Force re-crawl articles when citation counts differ or to refresh data
+scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --force
 
 # Custom delays
 scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --delay-min 3 --delay-max 8

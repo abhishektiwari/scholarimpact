@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 
 # Import commands
-from .commands import crawl, dashboard, extract, generate
+from .commands import crawl, dashboard, extract, generate, list_articles
 
 # Setup logging
 logging.basicConfig(
@@ -33,6 +33,7 @@ def cli(ctx, verbose):
 # Add commands
 cli.add_command(extract.extract_author)
 cli.add_command(crawl.crawl_citations)
+cli.add_command(list_articles.list_articles)
 cli.add_command(dashboard.dashboard)
 cli.add_command(generate.generate_dashboard)
 # cli.add_command(assets.assets)  # Removed for simplified version
