@@ -71,10 +71,10 @@ pip install scholarimpact
 ## Caution
 This system is designed for academic research purposes and personal usage. Please use responsibly and in accordance with Google Scholar, OpenAlex, Altmetric terms of services with appropriate attribution.
 
-## Breaking Changes (v0.0.10)
+## Breaking Changes (v0.0.10+)
 
 ### API Key Requirements
-As of version v0.0.10, both OpenAlex and Altmetric now require API keys. This is a breaking change from previous versions.
+As of version v0.0.10+, both OpenAlex and Altmetric now require API keys. This is a breaking change from previous versions.
 
 #### What Changed:
 
