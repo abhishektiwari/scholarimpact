@@ -35,11 +35,21 @@ def add_rankings(citations_json, rankings_file):
 
     # Check if rankings file exists
     rankings_path = Path(rankings_file)
+
+    # If default location and file not found, also check for alternate filename
+    if not rankings_path.exists() and rankings_file == "./data/ScimagoIR2026-OverallRank.csv":
+        alternate_path = Path("./data/ScimagoIR 2026 - Overall Rank.csv")
+        if alternate_path.exists():
+            rankings_path = alternate_path
+
     if not rankings_path.exists():
         raise click.ClickException(
             f"Scimago rankings file not found: {rankings_path}\n"
             f"Please download it from: https://www.scimagoir.com\n"
-            f"And place it at: {rankings_path}"
+            f"And place it in the data/ folder as one of:\n"
+            f"  - ScimagoIR2026-OverallRank.csv\n"
+            f"  - ScimagoIR 2026 - Overall Rank.csv\n"
+            f"Or specify the path with: --rankings-file /path/to/file.csv"
         )
 
     click.echo(f"Using rankings file: {rankings_path.resolve()}")

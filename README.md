@@ -514,8 +514,8 @@ Options:
 
 To use the institution ranking features in ScholarImpact, you need to download the Scimago IR data:
 
-1. **Visit Scimago IR Portal**: https://www.scimagoir.com
-2. **Select Data**: Choose "Overall Rank" for global research rankings
+1. **Visit Scimago IR Portal** [Scimago IR](https://www.scimagoir.com/rankings.php)
+2. **Select Data**: Choose "Overall Rank" for global research rankings ([Direct Link](https://www.scimagoir.com/getdata.php?ranking=Overall&area=&sector=&country=&year=2026&top=0&format=csv&type=download))
 3. **Download CSV**: Download the CSV file with your preferred settings
 4. **Place File**: Save the file as `ScimagoIR2026-OverallRank.csv` in the `data/` directory
 
