@@ -494,6 +494,74 @@ scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY -
 scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --max-citations 100
 ```
 
+### `scholarimpact add-rankings` Command
+
+Add Scimago Institution Ranking to citation data for dashboard visualization:
+
+```bash
+scholarimpact add-rankings [OPTIONS] CITATIONS_JSON
+```
+
+Arguments:
+- `CITATIONS_JSON`: Path to citations JSON file (from `crawl-citations` command)
+
+Options:
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--rankings-file FILE` | str | ./data/ScimagoIR2026-OverallRank.csv | Path to Scimago rankings CSV file |
+
+**Download Instructions**
+
+To use the institution ranking features in ScholarImpact, you need to download the Scimago IR data:
+
+1. **Visit Scimago IR Portal** [Scimago IR](https://www.scimagoir.com/rankings.php)
+2. **Select Data**: Choose "Overall Rank" for global research rankings ([Direct Link](https://www.scimagoir.com/getdata.php?ranking=Overall&area=&sector=&country=&year=2026&top=0&format=csv&type=download))
+3. **Download CSV**: Download the CSV file with your preferred settings
+4. **Place File**: Save the file as `ScimagoIR2026-OverallRank.csv` in the `data/` directory
+
+**Direct Download Link** (Overall Rank 2026):
+```
+https://www.scimagoir.com/getdata.php?ranking=Overall&area=&sector=&country=&year=2026&top=0&format=csv&type=download
+```
+
+**What it does:**
+- Reads citation JSON file from `crawl-citations`
+- Matches each citing institution against Scimago 2026 global rankings (15,000+ institutions)
+- Adds `institution_rank` (integer 1-15000+) and `institution_rank_weight` (0.0-1.0) to each citing author
+- Updates the citations file in place
+- Displays enrichment summary with statistics
+
+**Data Structure After Enrichment:**
+Each citing author now includes ranking information:
+```json
+{
+  "citing_authors_details": [
+    {
+      "name": "Oliver Meyer",
+      "institution_display_name": "Arizona State University",
+      "institution_rank": 186,           // Scimago global rank
+      "institution_rank_weight": 0.74,   // Normalized 0-1
+      "country": "US",
+      "openalex_author_id": "..."
+    }
+  ]
+}
+```
+
+Examples:
+```bash
+# Add rankings using default location (./data/ScimagoIR2026-OverallRank.csv)
+scholarimpact add-rankings data/cites-12862953873024122861.json
+
+# Specify custom rankings file location
+scholarimpact add-rankings data/cites-12862953873024122861.json --rankings-file /path/to/rankings.csv
+
+# Bulk process all citation files
+for file in data/cites-*.json; do
+  scholarimpact add-rankings "$file"
+done
+```
+
 ### `ScholarImpact` Command
 
 Launch the interactive dashboard:

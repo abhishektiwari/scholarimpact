@@ -5,7 +5,7 @@ Main streamlit app component that replicates the exact original streamlit_app.py
 import json
 import os
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -188,7 +188,7 @@ class StreamlitAppComponent(BaseComponent):
             # Attribution section
             st.sidebar.markdown("### :material/attribution: Attribution")
             st.sidebar.markdown(
-                "Data sourced from Google Scholar, OpenAlex, and Altmetric.com for personal and fair usage."
+                "Data sourced from Google Scholar, OpenAlex, SCImago, and Altmetric.com for personal and fair usage."
             )
 
             # Display Research Interests after publication selection (exact match to original)
@@ -577,6 +577,10 @@ class StreamlitAppComponent(BaseComponent):
         # All the visualization sections exactly as in original
         self._render_visualizations(pub_data, COLOR_PALETTE, data_dir, has_enhanced_geo_data)
 
+        # Top Citing Institutions by Ranking
+        st.markdown("---")
+        self._render_top_citing_institutions(pub_data, data_dir)
+
         # Detailed Citations Table
         st.markdown("---")
         st.markdown("### Detailed Citations Table")
@@ -613,6 +617,116 @@ class StreamlitAppComponent(BaseComponent):
             st.info(
                 "No detailed citation data available. Run the citation crawler to generate detailed citation information."
             )
+
+    def _render_top_citing_institutions(self, pub_data: pd.Series, data_dir: str):
+        """Render table of top citing institutions by Scimago ranking."""
+        cites_id = pub_data.get("cites_id", "")
+        if not cites_id:
+            return
+
+        # Get citations file
+        if "," in cites_id:
+            file_cites_id = cites_id.replace(",", "_")
+        else:
+            file_cites_id = cites_id
+
+        json_file = f"{data_dir}/cites-{file_cites_id}.json"
+        if not os.path.exists(json_file):
+            return
+
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                citations = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return
+
+        st.markdown("### Top Citing Institutions")
+        st.markdown("_Based on citing Author's affiliation and Scimago Institutions Ranking_")
+
+        # Collect institutions and their citation counts
+        institution_citations = defaultdict(int)
+        institution_ranks = {}
+        institution_rank_weights = {}
+
+        for citation in citations:
+            citing_authors_details = citation.get("citing_authors_details", [])
+            for author in citing_authors_details:
+                if isinstance(author, dict):
+                    institution = author.get("institution_display_name")
+                    if institution and institution not in ["Unknown", ""]:
+                        institution_citations[institution] += 1
+
+                        # Get rank and rank weight if available
+                        if institution not in institution_ranks:
+                            rank = author.get("institution_rank")
+                            rank_weight = author.get("institution_rank_weight", 0)
+                            institution_ranks[institution] = rank
+                            institution_rank_weights[institution] = rank_weight
+
+        if not institution_citations:
+            st.info("No institution data available.")
+            return
+
+        # Build table data with only ranked institutions
+        table_data = []
+        total_ranked_citations = 0
+        top_100_citations = 0
+
+        for institution, citations_count in institution_citations.items():
+            rank = institution_ranks.get(institution)
+            # Only include institutions with Scimago ranking
+            if rank:
+                table_data.append(
+                    {
+                        "Institution": institution,
+                        "Rank": rank,
+                    }
+                )
+                # Count total citations and top 100 citations
+                total_ranked_citations += citations_count
+                if rank <= 1000:
+                    top_100_citations += citations_count
+
+        if not table_data:
+            st.info("No Scimago-ranked institutions citing this work.")
+            return
+
+        # Sort by rank (lower rank = better)
+        table_data.sort(key=lambda x: x["Rank"])
+
+        # Calculate prestige concentration percentage
+        prestige_concentration = (top_100_citations / total_ranked_citations * 100) if total_ranked_citations > 0 else 0
+
+        # Display metric widgets with border
+        metric_col1, metric_col2 = st.columns(2)
+        with metric_col1:
+            st.metric(
+                ":material/school: Scimago-Ranked Institutions",
+                len(table_data),
+                border=True,
+                help="Number of institutions citing this work that are ranked in Scimago Institutions Ranking",
+            )
+
+        with metric_col2:
+            st.metric(
+                ":material/star: Prestige Concentration",
+                f"{prestige_concentration:.1f}%",
+                border=True,
+                help="Percentage of citations from top 1000 Scimago-ranked Institutions",
+            )
+
+        # Display as dataframe (Institution only)
+        df = pd.DataFrame(table_data)[["Institution"]]
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Institution": st.column_config.TextColumn("Institution", width="large"),
+            },
+        )
+
+        st.caption(f"Showing {len(table_data)} institutions citing this work ranked in Scimago research ranking.")
 
     def _generate_insight(self, pub_data: pd.Series) -> str:
         """Generate human-readable insight exactly as in original."""
