@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @click.command(name="add-rankings")
 @click.argument("citations_json")
 def add_rankings(citations_json):
-    """Add Scimago institution rankings to citation data.
+    """Add Scimago Institutions Ranking to citation data.
 
     This command enriches the citations JSON file with institution ranking data
     from Scimago, adding institution_rank and institution_rank_weight to each

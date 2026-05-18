@@ -188,7 +188,7 @@ class StreamlitAppComponent(BaseComponent):
             # Attribution section
             st.sidebar.markdown("### :material/attribution: Attribution")
             st.sidebar.markdown(
-                "Data sourced from Google Scholar, OpenAlex, and Altmetric.com for personal and fair usage."
+                "Data sourced from Google Scholar, OpenAlex, SCImago, and Altmetric.com for personal and fair usage."
             )
 
             # Display Research Interests after publication selection (exact match to original)
@@ -715,15 +715,14 @@ class StreamlitAppComponent(BaseComponent):
                 help="Percentage of citations from top 1000 Scimago-ranked Institutions",
             )
 
-        # Display as dataframe (Institution and Rank only)
-        df = pd.DataFrame(table_data)[["Institution", "Rank"]]
+        # Display as dataframe (Institution only)
+        df = pd.DataFrame(table_data)[["Institution"]]
         st.dataframe(
             df,
             use_container_width=True,
             hide_index=True,
             column_config={
                 "Institution": st.column_config.TextColumn("Institution", width="large"),
-                "Rank": st.column_config.TextColumn("Scimago Rank", width="small"),
             },
         )
 
