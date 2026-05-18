@@ -3,15 +3,8 @@
 import csv
 import json
 import logging
-from collections import defaultdict
-from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional
-
-try:
-    import networkx as nx
-except ImportError:
-    nx = None
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +100,7 @@ class InstitutionRankings:
             if ranked_parts and normalized_parts:
                 overlap = len(normalized_parts & ranked_parts)
                 similarity = overlap / max(len(normalized_parts), len(ranked_parts))
-                if similarity >= 0.7:
+                if similarity >= 0.85:
                     return data["rank"]
 
         return None
@@ -197,14 +190,10 @@ logger = logging.getLogger(__name__)
 
 
 class InstitutionRanker:
-    """Enrich citation data with institution rankings and analyze citations."""
+    """Enrich citation data with institution rankings."""
 
     def __init__(self):
         """Initialize institution ranker."""
-        if nx is None:
-            raise ImportError(
-                "networkx package not found. Install it with: pip install networkx"
-            )
         self.rankings = get_rankings()
 
     def enrich_citations_with_rankings(self, citations_file: str) -> Dict[str, any]:
@@ -264,169 +253,3 @@ class InstitutionRanker:
         except Exception as e:
             logger.error(f"Error writing enriched citations: {e}")
             return {"error": str(e), "success": False}
-
-    def create_weighted_bipartite_network(
-        self, citations_file: str, rank_weight: bool = True
-    ) -> Dict[str, any]:
-        """
-        Create a weighted bipartite network of authors and institutions.
-
-        Args:
-            citations_file: Path to citations JSON file
-            rank_weight: If True, weight edges by institution rank. If False, weight by citation count.
-
-        Returns:
-            Dict containing network data and statistics
-        """
-        try:
-            with open(citations_file, "r", encoding="utf-8") as f:
-                citations = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError) as e:
-            logger.error(f"Error loading citations file: {e}")
-            return {"error": str(e)}
-
-        # Create bipartite graph
-        G = nx.Graph()
-
-        # Track data for analysis
-        author_institution_map = defaultdict(set)
-        institution_author_map = defaultdict(set)
-        author_citation_count = defaultdict(int)
-        institution_citation_count = defaultdict(int)
-        author_institution_edges = defaultdict(int)
-
-        # Process citations
-        for citation in citations:
-            citing_year = citation.get("citing_year", "Unknown")
-            citations_count = citation.get("citations_count", 1)
-            citing_authors_details = citation.get("citing_authors_details", [])
-
-            for author_detail in citing_authors_details:
-                if not isinstance(author_detail, dict):
-                    continue
-
-                author_name = author_detail.get("name", "Unknown")
-                institution = author_detail.get("institution_display_name", "Unknown")
-
-                if author_name and author_name not in ["Unknown", ""]:
-                    # Skip unknown institutions
-                    if institution and institution not in ["Unknown", ""]:
-                        # Add nodes
-                        G.add_node(author_name, node_type="author", year=citing_year)
-                        G.add_node(institution, node_type="institution")
-
-                        # Calculate edge weight
-                        if rank_weight:
-                            # Weight by institution ranking (0-1)
-                            weight = self.rankings.get_rank_weight(institution, top_n=100)
-                        else:
-                            # Weight by citation count
-                            weight = min(1.0, citations_count / 10)  # Normalize to 0-1
-
-                        # Add or update edge
-                        if G.has_edge(author_name, institution):
-                            # Update weight (use max weight)
-                            current_weight = G[author_name][institution].get("weight", 0)
-                            new_weight = max(current_weight, weight)
-                            G[author_name][institution]["weight"] = new_weight
-                        else:
-                            G.add_edge(author_name, institution, weight=weight)
-
-                        # Track relationships
-                        author_institution_map[author_name].add(institution)
-                        institution_author_map[institution].add(author_name)
-                        author_citation_count[author_name] += citations_count
-                        institution_citation_count[institution] += citations_count
-                        author_institution_edges[(author_name, institution)] += 1
-
-        # Analyze network
-        authors = [n for n, d in G.nodes(data=True) if d.get("node_type") == "author"]
-        institutions = [
-            n for n, d in G.nodes(data=True) if d.get("node_type") == "institution"
-        ]
-
-        # Calculate top authors and institutions
-        top_authors = sorted(
-            author_citation_count.items(), key=lambda x: x[1], reverse=True
-        )[:10]
-        top_institutions = sorted(
-            institution_citation_count.items(), key=lambda x: x[1], reverse=True
-        )[:10]
-
-        # Build nodes and edges data for visualization
-        nodes_data = []
-        edges_data = []
-
-        # Add author nodes
-        for author in authors:
-            nodes_data.append(
-                {
-                    "id": author,
-                    "label": author,
-                    "type": "author",
-                    "citations": int(author_citation_count[author]),
-                    "institutions": len(author_institution_map[author]),
-                }
-            )
-
-        # Add institution nodes with ranking info
-        for institution in institutions:
-            rank_info = self.rankings.get_institution_info(institution)
-            rank = rank_info.get("rank") if rank_info else None
-
-            nodes_data.append(
-                {
-                    "id": institution,
-                    "label": institution,
-                    "type": "institution",
-                    "citations": int(institution_citation_count[institution]),
-                    "authors": len(institution_author_map[institution]),
-                    "rank": rank,
-                    "country": rank_info.get("country") if rank_info else "Unknown",
-                }
-            )
-
-        # Add edges with weights
-        for author, institution in G.edges():
-            edge_data = G[author][institution]
-            edges_data.append(
-                {
-                    "source": author,
-                    "target": institution,
-                    "weight": float(edge_data.get("weight", 0.5)),
-                }
-            )
-
-        return {
-            "success": True,
-            "network": {
-                "nodes": nodes_data,
-                "edges": edges_data,
-                "total_nodes": len(nodes_data),
-                "total_edges": len(edges_data),
-                "total_authors": len(authors),
-                "total_institutions": len(institutions),
-                "weight_type": "rank" if rank_weight else "citations",
-            },
-            "statistics": {
-                "top_authors": [
-                    {"name": name, "citations": int(count)} for name, count in top_authors
-                ],
-                "top_institutions": [
-                    {
-                        "name": name,
-                        "authors": len(institution_author_map[name]),
-                        "citations": int(institution_citation_count[name]),
-                        "rank": self.rankings.get_rank(name),
-                    }
-                    for name, _ in top_institutions
-                ],
-                "total_connections": len(author_institution_edges),
-                "average_authors_per_institution": len(authors) / len(institutions)
-                if institutions
-                else 0,
-                "average_institutions_per_author": len(institutions) / len(authors)
-                if authors
-                else 0,
-            },
-        }

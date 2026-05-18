@@ -45,11 +45,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-network = [
-    "networkx>=3.0.0",
-    "pyvis>=0.3.0",
-]
-
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",

@@ -640,11 +640,13 @@ class StreamlitAppComponent(BaseComponent):
         except (FileNotFoundError, json.JSONDecodeError):
             return
 
-        st.markdown("### Top Citing Institutions by Author Affiliation")
+        st.markdown("### Top Citing Institutions")
+        st.markdown("_Based on citing Author's affiliation and Scimago Institutions Ranking_")
 
         # Collect institutions and their citation counts
         institution_citations = defaultdict(int)
         institution_ranks = {}
+        institution_rank_weights = {}
 
         for citation in citations:
             citing_authors_details = citation.get("citing_authors_details", [])
@@ -654,10 +656,12 @@ class StreamlitAppComponent(BaseComponent):
                     if institution and institution not in ["Unknown", ""]:
                         institution_citations[institution] += 1
 
-                        # Get rank if available
+                        # Get rank and rank weight if available
                         if institution not in institution_ranks:
                             rank = author.get("institution_rank")
+                            rank_weight = author.get("institution_rank_weight", 0)
                             institution_ranks[institution] = rank
+                            institution_rank_weights[institution] = rank_weight
 
         if not institution_citations:
             st.info("No institution data available.")
@@ -665,6 +669,9 @@ class StreamlitAppComponent(BaseComponent):
 
         # Build table data with only ranked institutions
         table_data = []
+        total_ranked_citations = 0
+        top_100_citations = 0
+
         for institution, citations_count in institution_citations.items():
             rank = institution_ranks.get(institution)
             # Only include institutions with Scimago ranking
@@ -672,10 +679,13 @@ class StreamlitAppComponent(BaseComponent):
                 table_data.append(
                     {
                         "Institution": institution,
-                        "Citations": citations_count,
                         "Rank": rank,
                     }
                 )
+                # Count total citations and top 100 citations
+                total_ranked_citations += citations_count
+                if rank <= 1000:
+                    top_100_citations += citations_count
 
         if not table_data:
             st.info("No Scimago-ranked institutions citing this work.")
@@ -683,6 +693,27 @@ class StreamlitAppComponent(BaseComponent):
 
         # Sort by rank (lower rank = better)
         table_data.sort(key=lambda x: x["Rank"])
+
+        # Calculate prestige concentration percentage
+        prestige_concentration = (top_100_citations / total_ranked_citations * 100) if total_ranked_citations > 0 else 0
+
+        # Display metric widgets with border
+        metric_col1, metric_col2 = st.columns(2)
+        with metric_col1:
+            st.metric(
+                ":material/school: Scimago-Ranked Institutions",
+                len(table_data),
+                border=True,
+                help="Number of institutions citing this work that are ranked in Scimago Institutions Ranking",
+            )
+
+        with metric_col2:
+            st.metric(
+                ":material/star: Prestige Concentration",
+                f"{prestige_concentration:.1f}%",
+                border=True,
+                help="Percentage of citations from top 1000 Scimago-ranked Institutions",
+            )
 
         # Display as dataframe (Institution and Rank only)
         df = pd.DataFrame(table_data)[["Institution", "Rank"]]

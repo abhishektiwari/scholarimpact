@@ -494,6 +494,83 @@ scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY -
 scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY --max-citations 100
 ```
 
+### `scholarimpact add-rankings` Command
+
+Add Scimago institution rankings to citation data for dashboard visualization:
+
+```bash
+scholarimpact add-rankings [OPTIONS] CITATIONS_JSON
+```
+
+Arguments:
+- `CITATIONS_JSON`: Path to citations JSON file (from `crawl-citations` command)
+
+This command enriches citation data with Scimago institution rankings, enabling the dashboard to display "Top Citing Institutions" sorted by global research prominence.
+
+**What it does:**
+- Reads citation JSON file from `crawl-citations`
+- Matches each citing institution against Scimago 2026 global rankings (15,000+ institutions)
+- Adds `institution_rank` (integer 1-15000+) and `institution_rank_weight` (0.0-1.0) to each citing author
+- Updates the citations file in place
+- Displays enrichment summary with statistics
+
+**Ranking Details:**
+- **Scimago 2026**: Global institution research rankings covering universities, government, companies, and health sectors
+- **Matching**: 3-tier fuzzy matching for accuracy despite name variations
+  - Exact name match
+  - Normalized (case-insensitive) match
+  - Partial match (>70% word overlap)
+- **Weight Calculation**:
+  - Top 100 institutions: weight 0.3-1.0 (linear scale)
+  - Ranked 101-5000: weight 0.1-0.3
+  - Beyond 5000: weight 0.0
+
+**Output:**
+The command displays enrichment statistics:
+```
+================================================================================
+RANKINGS ADDED
+================================================================================
+
+File: data/cites-12862953873024122861.json
+Enriched entries: 145
+Ranked institutions: 78
+Total citations: 156
+
+================================================================================
+✓ Institution rankings added successfully!
+Ready for dashboard visualization showing top citing institutions.
+================================================================================
+```
+
+**Data Structure After Enrichment:**
+Each citing author now includes ranking information:
+```json
+{
+  "citing_authors_details": [
+    {
+      "name": "Oliver Meyer",
+      "institution_display_name": "Arizona State University",
+      "institution_rank": 186,           // Scimago global rank
+      "institution_rank_weight": 0.74,   // Normalized 0-1
+      "country": "US",
+      "openalex_author_id": "..."
+    }
+  ]
+}
+```
+
+Examples:
+```bash
+# Add rankings to a single citations file
+scholarimpact add-rankings data/cites-12862953873024122861.json
+
+# Bulk process all citation files
+for file in data/cites-*.json; do
+  scholarimpact add-rankings "$file"
+done
+```
+
 ### `ScholarImpact` Command
 
 Launch the interactive dashboard:
