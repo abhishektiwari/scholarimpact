@@ -13,8 +13,13 @@ logger = logging.getLogger(__name__)
 
 @click.command(name="add-rankings")
 @click.argument("citations_json")
-def add_rankings(citations_json):
-    """Add Scimago Institutions Ranking to citation data.
+@click.option(
+    "--rankings-file",
+    default="./data/ScimagoIR2026-OverallRank.csv",
+    help="Path to Scimago Institution Rankings CSV file",
+)
+def add_rankings(citations_json, rankings_file):
+    """Add Scimago Institution Ranking to citation data.
 
     This command enriches the citations JSON file with institution ranking data
     from Scimago, adding institution_rank and institution_rank_weight to each
@@ -28,9 +33,20 @@ def add_rankings(citations_json):
 
     click.echo(f"Processing citation file: {citations_json}")
 
+    # Check if rankings file exists
+    rankings_path = Path(rankings_file)
+    if not rankings_path.exists():
+        raise click.ClickException(
+            f"Scimago rankings file not found: {rankings_path}\n"
+            f"Please download it from: https://www.scimagoir.com\n"
+            f"And place it at: {rankings_path}"
+        )
+
+    click.echo(f"Using rankings file: {rankings_path.resolve()}")
+
     # Initialize ranker
     try:
-        ranker = InstitutionRanker()
+        ranker = InstitutionRanker(rankings_file=str(rankings_path))
     except ImportError as e:
         raise click.ClickException(
             f"Required package missing: {e}. Install with: pip install networkx"

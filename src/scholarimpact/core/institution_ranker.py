@@ -192,9 +192,17 @@ logger = logging.getLogger(__name__)
 class InstitutionRanker:
     """Enrich citation data with institution rankings."""
 
-    def __init__(self):
-        """Initialize institution ranker."""
-        self.rankings = get_rankings()
+    def __init__(self, rankings_file: Optional[str] = None):
+        """
+        Initialize institution ranker.
+
+        Args:
+            rankings_file: Path to Scimago rankings CSV file. If None, uses default location.
+        """
+        if rankings_file:
+            self.rankings = InstitutionRankings(rankings_file=rankings_file)
+        else:
+            self.rankings = get_rankings()
 
     def enrich_citations_with_rankings(self, citations_file: str) -> Dict[str, any]:
         """

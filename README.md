@@ -496,7 +496,7 @@ scholarimpact crawl-citations data/author.json --openalex-api-key YOUR_API_KEY -
 
 ### `scholarimpact add-rankings` Command
 
-Add Scimago Institutions Ranking to citation data for dashboard visualization:
+Add Scimago Institution Ranking to citation data for dashboard visualization:
 
 ```bash
 scholarimpact add-rankings [OPTIONS] CITATIONS_JSON
@@ -505,7 +505,24 @@ scholarimpact add-rankings [OPTIONS] CITATIONS_JSON
 Arguments:
 - `CITATIONS_JSON`: Path to citations JSON file (from `crawl-citations` command)
 
-This command enriches citation data with Scimago Institutions Ranking, enabling the dashboard to display "Top Citing Institutions" sorted by global research prominence.
+Options:
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--rankings-file FILE` | str | ./data/ScimagoIR2026-OverallRank.csv | Path to Scimago rankings CSV file |
+
+**Download Instructions**
+
+To use the institution ranking features in ScholarImpact, you need to download the Scimago IR data:
+
+1. **Visit Scimago IR Portal**: https://www.scimagoir.com
+2. **Select Data**: Choose "Overall Rank" for global research rankings
+3. **Download CSV**: Download the CSV file with your preferred settings
+4. **Place File**: Save the file as `ScimagoIR2026-OverallRank.csv` in the `data/` directory
+
+**Direct Download Link** (Overall Rank 2026):
+```
+https://www.scimagoir.com/getdata.php?ranking=Overall&area=&sector=&country=&year=2026&top=0&format=csv&type=download
+```
 
 **What it does:**
 - Reads citation JSON file from `crawl-citations`
@@ -533,8 +550,11 @@ Each citing author now includes ranking information:
 
 Examples:
 ```bash
-# Add rankings to a single citations file
+# Add rankings using default location (./data/ScimagoIR2026-OverallRank.csv)
 scholarimpact add-rankings data/cites-12862953873024122861.json
+
+# Specify custom rankings file location
+scholarimpact add-rankings data/cites-12862953873024122861.json --rankings-file /path/to/rankings.csv
 
 # Bulk process all citation files
 for file in data/cites-*.json; do
