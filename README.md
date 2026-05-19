@@ -245,7 +245,8 @@ my-research-dashboard/
 ├── Dockerfile                # Docker container configuration
 ├── docker-compose.yml        # Docker Compose orchestration (optional)
 ├── .streamlit/
-│   └── config.toml          # Streamlit configuration
+│   ├── config.toml          # Streamlit configuration (theme, server settings)
+│   └── secrets.toml         # Widget visibility & configuration (SCHOLARIMPACT_HIDE_WIDGETS)
 ├── static/                  # Static assets (fonts from scholarimpact/assets/fonts)
 │   ├── SpaceGrotesk-SemiBold.ttf
 │   ├── SpaceGrotesk-VariableFont_wght.ttf
@@ -697,20 +698,27 @@ Customize your dashboard's appearance and content. All changes take effect when 
 
 ### Hide/Show Dashboard Sections (Widgets)
 
-Control which analysis sections appear on your dashboard using the `.env` file. When you generate a dashboard with `scholarimpact generate-dashboard`, a `.env` file is created automatically.
+Control which analysis sections appear on your dashboard using Streamlit's native secrets configuration. When you generate a dashboard with `scholarimpact generate-dashboard`, a `.streamlit/secrets.toml` file is created automatically.
 
-**Method 1: Using `.env` File (Recommended for Local & Cloud)**
+**Method 1: Using `.streamlit/secrets.toml` (Recommended for Local & All Deployments)**
 
-Edit the `.env` file in your project directory:
+Edit the `.streamlit/secrets.toml` file in your project directory:
 
-```bash
-# .env file (same directory as app.py)
-SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention,Top_Citing_Countries
+```toml
+# .streamlit/secrets.toml
+SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
 ```
 
-**Method 2: Using Environment Variables (Docker & Cloud)**
+**Method 2: Using Streamlit Cloud Secrets**
 
-Set the environment variable directly:
+In your Streamlit Cloud app settings, add to "Secrets":
+```toml
+SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
+```
+
+**Method 3: Using Environment Variables (Docker & Cloud)**
+
+Set the environment variable as a fallback:
 
 ```bash
 # In terminal/shell
@@ -718,20 +726,13 @@ export SCHOLARIMPACT_HIDE_WIDGETS="Altmetric_Attention,Top_Citing_Countries"
 streamlit run app.py
 ```
 
-**Method 3: Using docker-compose.yml (Docker Deployment)**
+**Method 4: Using docker-compose.yml (Docker Deployment)**
 
 ```yaml
 services:
   scholarimpact:
     environment:
       SCHOLARIMPACT_HIDE_WIDGETS: "Altmetric_Attention,Top_Citing_Countries"
-```
-
-**Method 4: Using Streamlit Cloud Secrets**
-
-In your Streamlit Cloud app settings, add to "Secrets":
-```
-SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
 ```
 
 **Available Widget Names:**
@@ -746,18 +747,21 @@ SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
 - `Detailed_Citations_Table` - Complete paginated table of all citing papers
 
 **Examples:**
-```bash
-# Show all sections (empty value)
-SCHOLARIMPACT_HIDE_WIDGETS=
+
+In `.streamlit/secrets.toml`:
+
+```toml
+# Show all sections (empty string)
+SCHOLARIMPACT_HIDE_WIDGETS = ""
 
 # Hide Altmetric section only
-SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
+SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention"
 
 # Hide multiple sections
-SCHOLARIMPACT_HIDE_WIDGETS=Research_Domain_Analysis,Altmetric_Attention,Notable_Citations
+SCHOLARIMPACT_HIDE_WIDGETS = "Research_Domain_Analysis,Altmetric_Attention,Notable_Citations"
 
 # Hide many sections to focus on geographic analysis
-SCHOLARIMPACT_HIDE_WIDGETS=Research_Domain_Analysis,Altmetric_Attention,Notable_Citations,Top_Citing_Institutions,Detailed_Citations_Table
+SCHOLARIMPACT_HIDE_WIDGETS = "Research_Domain_Analysis,Altmetric_Attention,Notable_Citations,Top_Citing_Institutions,Detailed_Citations_Table"
 ```
 
 ### Customize Theme Colors
