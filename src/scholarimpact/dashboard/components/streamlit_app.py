@@ -19,6 +19,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 
 from .base import BaseComponent, ComponentRegistry
+from .widget_config import WidgetConfig
 
 
 class StreamlitAppComponent(BaseComponent):
@@ -572,51 +573,103 @@ class StreamlitAppComponent(BaseComponent):
                     )
 
         # Visualizations
-        st.markdown("---")
-
-        # All the visualization sections exactly as in original
-        self._render_visualizations(pub_data, COLOR_PALETTE, data_dir, has_enhanced_geo_data)
+        visible_viz_widgets = [
+            "Top_Citing_Countries",
+            "Citation_Distribution_by_Country",
+            "Citations_Distribution_by_Year",
+            "Research_Domain_Analysis",
+        ]
+        if any(WidgetConfig.should_render(w) for w in visible_viz_widgets):
+            st.markdown("---")
+            # All the visualization sections exactly as in original
+            self._render_visualizations(pub_data, COLOR_PALETTE, data_dir, has_enhanced_geo_data)
 
         # Top Citing Institutions by Ranking
-        st.markdown("---")
-        self._render_top_citing_institutions(pub_data, data_dir)
+        if WidgetConfig.should_render("Top_Citing_Institutions"):
+            st.markdown("---")
+            self._render_top_citing_institutions(pub_data, data_dir)
+
+        # Notable Citations (Top 10% of citing articles)
+        if WidgetConfig.should_render("Notable_Citations"):
+            st.markdown("---")
+            self._render_notable_citations(pub_data, data_dir)
 
         # Detailed Citations Table
-        st.markdown("---")
-        st.markdown("### Detailed Citations Table")
+        if WidgetConfig.should_render("Detailed_Citations_Table"):
+            st.markdown("---")
+            st.markdown("### :material/table: Detailed Citations Table")
+            st.markdown("_Complete list of all citing papers with author affiliations, publication venues, and geographic information_")
 
-        citations_table_data = self._create_citations_table(pub_data, data_dir)
+            citations_table_data = self._create_citations_table(pub_data, data_dir)
 
-        if citations_table_data and len(citations_table_data) > 0:
-            citations_df = pd.DataFrame(citations_table_data)
+            if citations_table_data and len(citations_table_data) > 0:
+                citations_df = pd.DataFrame(citations_table_data)
 
-            # Replace None values with NaN for proper handling in Streamlit
-            citations_df["Year"] = citations_df["Year"].replace({None: pd.NA})
+                # Replace None values with NaN for proper handling in Streamlit
+                citations_df["Year"] = citations_df["Year"].replace({None: pd.NA})
 
-            # Display the enhanced citations table
-            st.dataframe(
-                citations_df,
-                use_container_width=True,
-                hide_index=True,
-                column_config={
-                    "Paper Title": st.column_config.TextColumn("Citing Paper", width="large"),
-                    "Authors": st.column_config.TextColumn("Authors", width="medium"),
-                    "Year": st.column_config.NumberColumn("Year", width="small", format="%d"),
-                    "Venue": st.column_config.TextColumn("Venue", width="medium"),
-                    "Author Affiliations": st.column_config.TextColumn(
-                        "Affiliations", width="large", help="Institutions of citing authors"
-                    ),
-                    "Countries": st.column_config.TextColumn(
-                        "Countries", width="medium", help="Countries of citing authors"
-                    ),
-                },
-            )
+                # Initialize pagination state
+                if "citations_page" not in st.session_state:
+                    st.session_state.citations_page = 1
+                if "citations_per_page" not in st.session_state:
+                    st.session_state.citations_per_page = 10
 
-            st.info(f"Showing {len(citations_df)} citing papers with detailed author information")
-        else:
-            st.info(
-                "No detailed citation data available. Run the citation crawler to generate detailed citation information."
-            )
+                total_records = len(citations_df)
+                total_pages = (total_records + st.session_state.citations_per_page - 1) // st.session_state.citations_per_page
+
+                # Pagination controls - rows per page on top
+                st.session_state.citations_per_page = st.selectbox(
+                    "Rows per page:",
+                    options=[10, 25, 50, 100],
+                    index=0,
+                    key="citations_rows_select"
+                )
+
+                # Navigation buttons below
+                nav_col1, nav_col2= st.columns([1, 1])
+
+                with nav_col1:
+                    if st.button("← Prev", use_container_width=True, key="citations_prev"):
+                        if st.session_state.citations_page > 1:
+                            st.session_state.citations_page -= 1
+                            st.rerun()
+
+                with nav_col2:
+                    if st.button("Next →", use_container_width=True, key="citations_next"):
+                        if st.session_state.citations_page < total_pages:
+                            st.session_state.citations_page += 1
+                            st.rerun()
+
+                # Calculate start and end indices for current page
+                start_idx = (st.session_state.citations_page - 1) * st.session_state.citations_per_page
+                end_idx = min(start_idx + st.session_state.citations_per_page, total_records)
+
+                # Display paginated dataframe
+                paginated_df = citations_df.iloc[start_idx:end_idx]
+
+                st.dataframe(
+                    paginated_df,
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Paper Title": st.column_config.TextColumn("Citing Paper", width="large"),
+                        "Authors": st.column_config.TextColumn("Authors", width="medium"),
+                        "Year": st.column_config.NumberColumn("Year", width="small", format="%d"),
+                        "Venue": st.column_config.TextColumn("Venue", width="medium"),
+                        "Author Affiliations": st.column_config.TextColumn(
+                            "Affiliations", width="large", help="Institutions of citing authors"
+                        ),
+                        "Countries": st.column_config.TextColumn(
+                            "Countries", width="medium", help="Countries of citing authors"
+                        ),
+                    },
+                )
+
+                st.info(f"Showing rows {start_idx + 1}–{end_idx} of {total_records} citing papers")
+            else:
+                st.info(
+                    "No detailed citation data available. Run the citation crawler to generate detailed citation information."
+                )
 
     def _render_top_citing_institutions(self, pub_data: pd.Series, data_dir: str):
         """Render table of top citing institutions by Scimago ranking."""
@@ -640,8 +693,8 @@ class StreamlitAppComponent(BaseComponent):
         except (FileNotFoundError, json.JSONDecodeError):
             return
 
-        st.markdown("### Top Citing Institutions")
-        st.markdown("_Based on citing Author's affiliation and Scimago Institutions Ranking_")
+        st.markdown("### :material/school: Top Citing Institutions")
+        st.markdown("_Ranked institutions whose researchers have cited this work, based on Scimago Institutions Ranking_")
 
         # Collect institutions and their citation counts
         institution_citations = defaultdict(int)
@@ -727,6 +780,142 @@ class StreamlitAppComponent(BaseComponent):
         )
 
         st.caption(f"Showing {len(table_data)} institutions citing this work ranked in Scimago research ranking.")
+
+    def _render_notable_citations(self, pub_data: pd.Series, data_dir: str):
+        """Render table of top 10% citing articles by citation count."""
+        cites_id = pub_data.get("cites_id", "")
+        if not cites_id:
+            return
+
+        # Get citations file
+        if "," in cites_id:
+            file_cites_id = cites_id.replace(",", "_")
+        else:
+            file_cites_id = cites_id
+
+        json_file = f"{data_dir}/cites-{file_cites_id}.json"
+        if not os.path.exists(json_file):
+            return
+
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                citations = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return
+
+        if not citations:
+            return
+
+        st.markdown("### :material/star: Notable Citations")
+        st.markdown("_Top 10% most cited articles that reference this work - influential papers citing this publication_")
+
+        # Process citations data to calculate percentiles
+        citations_with_counts = []
+
+        for citation in citations:
+            if not isinstance(citation, dict):
+                continue
+
+            paper_title = citation.get("citing_paper_title", "")
+            authors = citation.get("citing_authors", "")
+            year = citation.get("citing_year", "Unknown")
+            venue = citation.get("citing_venue", "")
+            citations_count = citation.get("citations_count", 0)
+
+            # Skip entries without proper data
+            if not paper_title or not authors:
+                continue
+
+            # Convert citations_count to int
+            try:
+                citations_count = int(citations_count) if citations_count else 0
+            except (ValueError, TypeError):
+                citations_count = 0
+
+            citations_with_counts.append({
+                "title": paper_title,
+                "authors": authors,
+                "year": year,
+                "venue": venue,
+                "citations": citations_count,
+                "full_data": citation
+            })
+
+        if not citations_with_counts:
+            st.info("No citation data available.")
+            return
+
+        # Calculate 90th percentile to get top 10%
+        citations_values = [c["citations"] for c in citations_with_counts]
+        percentile_90 = np.percentile(citations_values, 90) if citations_values else 0
+
+        # Filter to top 10%
+        notable_citations = [c for c in citations_with_counts if c["citations"] >= percentile_90]
+
+        # Sort by citation count descending
+        notable_citations.sort(key=lambda x: x["citations"], reverse=True)
+
+        if not notable_citations:
+            st.info("No notable citations in the top 10%.")
+            return
+
+        # Display metrics
+        metric_col1, metric_col2, metric_col3 = st.columns(3)
+        with metric_col1:
+            st.metric(
+                "Notable Citations",
+                len(notable_citations),
+                border=True,
+                help="Number of citing papers in top 10% by citation count"
+            )
+
+        with metric_col2:
+            avg_citations = int(np.mean([c["citations"] for c in notable_citations]))
+            st.metric(
+                "Avg Citations",
+                f"{avg_citations:,}",
+                border=True,
+                help="Average citation count of top 10% papers"
+            )
+
+        with metric_col3:
+            max_citations = max([c["citations"] for c in notable_citations])
+            st.metric(
+                "Max Citations",
+                f"{max_citations:,}",
+                border=True,
+                help="Highest citation count among citing papers"
+            )
+
+        # Create table data
+        table_data = []
+        for citation in notable_citations:
+            year_display = citation["year"] if citation["year"] != "Unknown" else "N/A"
+
+            table_data.append({
+                "Paper Title": citation["title"][:100] + "..." if len(citation["title"]) > 100 else citation["title"],
+                "Authors": citation["authors"][:80] + "..." if len(citation["authors"]) > 80 else citation["authors"],
+                "Year": year_display,
+                "Venue": citation["venue"][:60] + "..." if len(citation["venue"]) > 60 else citation["venue"],
+                "Citations": f"{citation['citations']:,}"
+            })
+
+        # Display as dataframe
+        df = pd.DataFrame(table_data)
+        st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Paper Title": st.column_config.TextColumn("Citing Paper", width="large"),
+                "Authors": st.column_config.TextColumn("Authors", width="medium"),
+                "Year": st.column_config.TextColumn("Year", width="small"),
+                "Venue": st.column_config.TextColumn("Venue", width="medium"),
+                "Citations": st.column_config.TextColumn("Citations", width="small"),
+            },
+        )
+
+        st.caption(f"Showing {len(notable_citations)} papers in top 10% (90th percentile: {percentile_90:.0f} citations)")
 
     def _generate_insight(self, pub_data: pd.Series) -> str:
         """Generate human-readable insight exactly as in original."""
@@ -922,8 +1111,9 @@ class StreamlitAppComponent(BaseComponent):
         elif "top_countries" in pub_data and pub_data["top_countries"]:
             countries_data = pub_data["top_countries"]
 
-        if countries_data:
-            st.markdown("### Top Citing Countries")
+        if countries_data and WidgetConfig.should_render("Top_Citing_Countries"):
+            st.markdown("### :material/public: Top Citing Countries")
+            st.markdown("_Countries with the highest number of citing articles, based on author affiliations_")
 
             # Sort by count (descending) and take top 15
             sorted_data = sorted(countries_data.items(), key=lambda x: x[1], reverse=True)[:15]
@@ -957,8 +1147,9 @@ class StreamlitAppComponent(BaseComponent):
             st.caption(f"Citations based on available country of authors. Top {len(countries)} countries.")
 
         # Citation Locations - World Map
-        if has_enhanced_geo_data and "top_countries_from_affiliations" in pub_data:
-            st.markdown("### Citation Distribution by Country")
+        if has_enhanced_geo_data and "top_countries_from_affiliations" in pub_data and WidgetConfig.should_render("Citation_Distribution_by_Country"):
+            st.markdown("### :material/language: Citation Distribution by Country")
+            st.markdown("_Global distribution of citations showing the geographic reach and international impact of this work_")
 
             country_counts = pub_data["top_countries_from_affiliations"]
 
@@ -1056,8 +1247,10 @@ class StreamlitAppComponent(BaseComponent):
                     st.caption(f"Citations distribution by available country of authors. Citations from {total_countries} countries.")
 
         # Citations per year chart
-        if has_enhanced_geo_data:
-            st.markdown("### Citations Distribution by Year")
+        if has_enhanced_geo_data and WidgetConfig.should_render("Citations_Distribution_by_Year"):
+            st.markdown("---")
+            st.markdown("### :material/calendar_today: Citation Distribution by Year")
+            st.markdown("_Citation trends over time showing the adoption and continued impact of this publication_")
 
             year_data = self._get_citations_per_year(pub_data, data_dir)
 
@@ -1101,9 +1294,14 @@ class StreamlitAppComponent(BaseComponent):
                 st.info("No year information available in citation data for this article.")
 
         # Research Domain Analysis
-        st.markdown("### Research Domain Analysis")
+        if WidgetConfig.should_render("Research_Domain_Analysis"):
+            st.markdown("---")
+            st.markdown("### :material/category: Research Domain Analysis")
+            st.markdown("_Interdisciplinary reach of this work across research domains, fields, and subfields_")
 
-        domain_data = self._analyze_research_domains(pub_data, data_dir)
+            domain_data = self._analyze_research_domains(pub_data, data_dir)
+        else:
+            domain_data = {}
 
         if domain_data and any(domain_data.values()):
             # Create tabs for different levels of analysis
@@ -1237,8 +1435,10 @@ class StreamlitAppComponent(BaseComponent):
                     st.info("No subfield information available in citation data.")
 
             # Interdisciplinary Impact Score
-            if domain_data.get("domains") and domain_data.get("fields"):
-                st.markdown("#### Interdisciplinary Impact Metrics")
+            if domain_data.get("domains") and domain_data.get("fields") and WidgetConfig.should_render("Interdisciplinary_Impact_Metrics"):
+                st.markdown("---")
+                st.markdown("### :material/trending_up: Interdisciplinary Impact Metrics")
+                st.markdown("_Key metrics measuring the breadth and diversity of this work's impact across research domains and patent citations_")
 
                 # Calculate patent citation count using highest value from available sources
                 patent_count_us = self._count_patent_citations(pub_data, data_dir)  # US patents
@@ -1310,7 +1510,7 @@ class StreamlitAppComponent(BaseComponent):
                         border=True,
                         help=patent_help_text,
                     )
-        else:
+        elif WidgetConfig.should_render("Research_Domain_Analysis"):
             st.info(
                 "Research domain analysis requires citation data with OpenAlex. Re-crawl with OpenAlex enabled to see this analysis."
             )
@@ -1583,10 +1783,11 @@ class StreamlitAppComponent(BaseComponent):
         ]
         
         has_altmetric_data = any(field in pub_data and pub_data[field] is not None for field in altmetric_fields)
-        
-        if has_altmetric_data:
-            st.markdown("#### Altmetric Data")
-            
+
+        if has_altmetric_data and WidgetConfig.should_render("Altmetric_Attention"):
+            st.markdown("### :material/insights: Altmetric Attention")
+            st.markdown("_Social media mentions, reader counts, and public engagement metrics measuring broader research impact_")
+
             # Create 2x2 grid for metrics
             altmetric_row1_col1, altmetric_row1_col2 = st.columns(2)
             altmetric_row2_col1, altmetric_row2_col2 = st.columns(2)
@@ -1665,8 +1866,10 @@ class StreamlitAppComponent(BaseComponent):
         else:
             # Only show section if this is likely a publication that could have Altmetric data
             # (i.e., has OpenAlex IDs indicating it was processed with enrichment)
-            if 'openalex_ids' in pub_data:
-                st.markdown("#### Altmetric Attention")
+            # AND widget is not hidden in config
+            if 'openalex_ids' in pub_data and WidgetConfig.should_render("Altmetric_Attention"):
+                st.markdown("### :material/insights: Altmetric Attention")
+                st.markdown("_Social media mentions, reader counts, and public engagement metrics measuring broader research impact_")
                 st.warning("No Altmetric data available for this publication.")
 
 

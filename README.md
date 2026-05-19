@@ -668,6 +668,95 @@ The generated project is ready for deployment to:
 - **Docker**: Build and run locally or on any Docker-compatible server
 - **Docker Compose**: Orchestrate with resource limits and environment configuration
 
+## Customize Your Dashboard
+
+Customize your dashboard's appearance and content by editing `.streamlit/config.toml`. All changes take effect when you refresh the dashboard - no restart needed!
+
+### Hide/Show Dashboard Sections (Widgets)
+
+Control which analysis sections appear on your dashboard using the `[widgets]` section:
+
+```toml
+[widgets]
+# Hide specific sections using snake_case names
+hideWidgets = ["Altmetric_Attention"]
+```
+
+**Available Widget Names:**
+- `Top_Citing_Countries` - Bar chart of countries with most citations
+- `Citation_Distribution_by_Country` - World map showing geographic distribution  
+- `Citations_Distribution_by_Year` - Citation trends over time
+- `Research_Domain_Analysis` - Analysis of research domains, fields, and subfields
+- `Interdisciplinary_Impact_Metrics` - Diversity score, patent citations, domain count
+- `Altmetric_Attention` - Social media mentions and public engagement metrics
+- `Notable_Citations` - Top 10% most-cited papers citing this work
+- `Top_Citing_Institutions` - Scimago-ranked institutions citing this work
+- `Detailed_Citations_Table` - Complete paginated table of all citing papers
+
+**Examples:**
+```toml
+# Show all sections
+[widgets]
+hideWidgets = []
+
+# Hide Altmetric section
+[widgets]
+hideWidgets = ["Altmetric_Attention"]
+
+# Hide multiple sections to focus on geographic analysis
+[widgets]
+hideWidgets = ["Research_Domain_Analysis", "Altmetric_Attention", "Notable_Citations"]
+```
+
+### Customize Theme Colors
+
+Modify the `[theme]` section to customize your color scheme. Here are the default colors:
+
+```toml
+[theme]
+primaryColor = "#cb785c"              # Main accent color
+backgroundColor = "#fdfdf8"            # Main background
+secondaryBackgroundColor = "#ecebe3"   # Secondary background (sidebars, containers)
+textColor = "#3d3a2a"                  # Primary text color
+linkColor = "#3d3a2a"                  # Link color
+borderColor = "#d3d2ca"                # Border/divider color
+codeBackgroundColor = "#ecebe4"        # Code block background
+```
+
+### Customize Fonts and Text Sizes
+
+The generated project includes custom fonts (SpaceGrotesk and SpaceMono) in the `static/` folder. Here are the default settings:
+
+```toml
+[theme]
+font = "SpaceGrotesk"                  # Default font family
+codeFont = "SpaceMono"                 # Code block font
+codeFontSize = ".75rem"                # Code text size
+headingFontSizes = ["3rem", "2rem"]    # H1 and H2 sizes
+headingFontWeights = [600,500,500,500,500,500]  # Font weights for headings
+```
+
+### Customize Layout and Styling
+
+```toml
+[theme]
+showWidgetBorder = true                # Show borders around widgets
+showSidebarBorder = true               # Show sidebar border
+baseRadius = "0.75rem"                 # Corner radius for elements
+buttonRadius = "full"                  # Button border radius ("full" = pill-shaped)
+chartCategoricalColors = ["#0ea5e9", "#059669", "#fbbf24"]  # Chart colors
+```
+
+### Customize Sidebar
+
+```toml
+[theme.sidebar]
+backgroundColor = "#f0f0ec"            # Sidebar background
+secondaryBackgroundColor = "#ecebe3"   # Secondary sidebar background
+headingFontSizes = ["1.6rem", "1.4rem", "1.2rem"]  # Heading sizes in sidebar
+dataframeHeaderBackgroundColor = "#e4e4e0"  # Table header background
+```
+
 ## Citation
 
 [![zenodo.17282762](https://zenodo.org/badge/DOI/10.5281/zenodo.17282708.svg)](https://doi.org/10.5281/zenodo.17282708)
