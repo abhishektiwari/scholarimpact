@@ -11,7 +11,7 @@ A bibliometric tool to analyse, visualise, and share your research impact, outpu
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/abhishektiwari/scholarimpact/total?label=GitHub%20Downloads)
 ![PyPI Downloads](https://img.shields.io/pepy/dt/scholarimpact?label=PyPI%20Downloads)
 
-For each article under your Google Scholar Profile, **_ScholarImpact_**: (1) total number of citations, (2) number of unique authors who have cited the article, (3) number of countries from which citations originate, (4) number of institutions from which citations originate, (5) geographic distribution of citations, (6) citation trends over time, (7) research domain analysis, (8) interdisciplinary impact Metrics including Patents and Wikipedia mentions (9) Alternative metrics.
+For each article under your Google Scholar Profile, **_ScholarImpact_** provides comprehensive analysis including: (1) total citation count with percentile rankings, (2) unique citing authors and institutions, (3) geographic distribution of citations by country, (4) top Scimago-ranked institutions citing your work with prestige metrics, (5) notable citations—the most influential articles (top 10%) that cite your work, (6) research domain analysis with field diversity scoring, (7) citation trends over time, (8) interdisciplinary impact metrics including patent citations, Wikipedia mentions, and social media engagement, and (9) customizable dashboard with widget visibility control and theme personalization.
 
 ![Example Dashboard](https://static.abhishek-tiwari.com/scholarimpact/example-dashboard-v4.png)
 
@@ -20,53 +20,75 @@ For each article under your Google Scholar Profile, **_ScholarImpact_**: (1) tot
 ![Research Domains Analysis](https://static.abhishek-tiwari.com/scholarimpact/research-domains-v4.png)
 
 ## Workflow Overview
-This workflow first extracts author data from your Google Scholar profile and optionally enriches it with OpenAlex and Altmetric data. Then it sources citations for each article under your Google Scholar profile. Next workflow enriches them with information using Google Scholar profiles of citing authors and/or OpenAlex APIs. Finally, output data is used to present your impact of your research with geographic and institutional insights.
 
+ScholarImpact follows a three-stage workflow to analyze and visualize your research impact:
+
+### Stage 1: Extract & Enrich Author Data
+Extract your publication list from Google Scholar and enrich with OpenAlex and Altmetric metrics:
 
 ```mermaid
-flowchart TD
-    A[Your Google Scholar Profile] --> B[Your Articles]
-    B --> C[OpenAlex API]
-    B --> D[Altmetric API]
-    C --> E[Enhanced Scholar Data]
-    D --> E[Enhanced Scholar Data]
+flowchart LR
+    A["🎓 Google Scholar<br/>Profile"] --> B["📄 Your Articles<br/>extraction"]
+    B --> C["🔗 OpenAlex API<br/>(optional enrichment)"]
+    B --> D["📊 Altmetric API<br/>(optional enrichment)"]
+    C --> E["✨ Enhanced<br/>Scholar Data"]
+    D --> E
     
     style A fill:#0ea5e9,stroke:#0ea5e9,color:#ffffff
+    style B fill:#ecebe3,stroke:#3d3a2a
     style C fill:#059669,stroke:#059669,color:#ffffff
     style D fill:#059669,stroke:#059669,color:#ffffff
-    style E fill:#ecebe3,stroke:#ecebe3,color:#3d3a2a
+    style E fill:#cb785c,stroke:#cb785c,color:#ffffff
 ```
 
+### Stage 2: Crawl & Analyze Citations
+Retrieve citing articles and enrich with detailed author, institutional, and ranking data:
+
 ```mermaid
-flowchart TD
-    A[Enhanced Scholar Data] --> B[Your Articles]
-    B --> C[Citing Articles]
-    B --> F[OpenAlex API]
-    C --> D[Enhanced Citation Data]
-    D --> E[Streamlit Dashboard]
+flowchart LR
+    A["✨ Enhanced<br/>Scholar Data"] --> B["🔍 Citing Articles<br/>crawl from Google Scholar"]
+    B --> C["🔗 OpenAlex API<br/>enrichment"]
+    B --> D["👤 Google Scholar<br/>Author Profiles"]
+    C --> E["🏆 Enhanced<br/>Citation Data"]
+    D --> E
+    C -.-> F["🌍 Affiliations<br/>& Countries"]
+    C -.-> G["🔬 Research<br/>Domains"]
+    C -.-> I["🎓 Scimago<br/>Institution Ranking"]
+    D -.-> H["✓ Verified<br/>Institutions"]
+    F --> E
+    G --> E
+    H --> E
+    I --> E
     
-    C --> F[OpenAlex API]
-    C --> G[Google Scholar Profiles of citing Authors]
-    F --> D
-    G --> D
-    
-    F -.-> H[Author Affiliations]
-    F -.-> I[Country Codes]
-    F -.-> J[Research Domains]
-    G -.-> K[Verified Email Domain]
-    G -.-> L[Profile Details including Affiliations]
-    
-    H --> D
-    I --> D
-    J --> D
-    K --> D
-    L --> D
-    
-    style A fill:#ecebe3,stroke:#ecebe3,color:#3d3a2a
+    style A fill:#cb785c,stroke:#cb785c,color:#ffffff
+    style B fill:#ecebe3,stroke:#3d3a2a
+    style C fill:#059669,stroke:#059669,color:#ffffff
+    style D fill:#fbbf24,stroke:#fbbf24,color:#3d3a2a
     style E fill:#cb785c,stroke:#cb785c,color:#ffffff
-    style F fill:#059669,stroke:#059669,color:#ffffff
-    style G fill:#fbbf24,stroke:#fbbf24,color:#3d3a2a
-    style D fill:#ecebe3,stroke:#ecebe3,color:#3d3a2a
+    style I fill:#059669,stroke:#059669,color:#ffffff
+```
+
+### Stage 3: Visualize & Share Impact
+Interactive Streamlit dashboard with customizable widgets and comprehensive analytics:
+
+```mermaid
+flowchart LR
+    A["🏆 Enhanced<br/>Citation Data"] --> B["📊 Streamlit Dashboard"]
+    B --> C["📈 Citation Metrics"]
+    B --> D["🌍 Geographic<br/>Distribution"]
+    B --> E["🏫 Institutions &<br/>Rankings"]
+    B --> F["⭐ Notable<br/>Citations"]
+    B --> G["🔬 Research<br/>Domains"]
+    B --> H["📱 Alt Metrics &<br/>Social Impact"]
+    
+    style A fill:#cb785c,stroke:#cb785c,color:#ffffff
+    style B fill:#cb785c,stroke:#cb785c,color:#ffffff
+    style C fill:#ecebe3,stroke:#3d3a2a
+    style D fill:#ecebe3,stroke:#3d3a2a
+    style E fill:#ecebe3,stroke:#3d3a2a
+    style F fill:#ecebe3,stroke:#3d3a2a
+    style G fill:#ecebe3,stroke:#3d3a2a
+    style H fill:#ecebe3,stroke:#3d3a2a
 ```
 
 ## Quick Start
@@ -233,8 +255,9 @@ my-research-dashboard/
 │   ├── SpaceMono-BoldItalic.ttf
 │   └── OFL-*.txt           # Font licenses
 └── data/
-    ├── author.json          # Author profile data
-    └── cites-*.json         # Citation data files
+    ├── author.json                           # Author profile data
+    ├── cites-*.json                          # Citation data files
+    └── ScimagoIR 2026 - Overall Rank.csv     # Scimago Institutions Ranking (for institution prestige metrics)
 ```
 
 #### Step 8: Docker Deployment (Alternative to Streamlit Cloud)
@@ -667,6 +690,95 @@ The generated project is ready for deployment to:
 - **Streamlit Cloud**: Push to GitHub and deploy via share.streamlit.io
 - **Docker**: Build and run locally or on any Docker-compatible server
 - **Docker Compose**: Orchestrate with resource limits and environment configuration
+
+## Customize Your Dashboard
+
+Customize your dashboard's appearance and content by editing `.streamlit/config.toml`. All changes take effect when you refresh the dashboard - no restart needed!
+
+### Hide/Show Dashboard Sections (Widgets)
+
+Control which analysis sections appear on your dashboard using the `[widgets]` section:
+
+```toml
+[widgets]
+# Hide specific sections using snake_case names
+hideWidgets = ["Altmetric_Attention"]
+```
+
+**Available Widget Names:**
+- `Top_Citing_Countries` - Bar chart of countries with most citations
+- `Citation_Distribution_by_Country` - World map showing geographic distribution  
+- `Citations_Distribution_by_Year` - Citation trends over time
+- `Research_Domain_Analysis` - Analysis of research domains, fields, and subfields
+- `Interdisciplinary_Impact_Metrics` - Diversity score, patent citations, domain count
+- `Altmetric_Attention` - Social media mentions and public engagement metrics
+- `Notable_Citations` - Top 10% most-cited papers citing this work
+- `Top_Citing_Institutions` - Scimago-ranked institutions citing this work
+- `Detailed_Citations_Table` - Complete paginated table of all citing papers
+
+**Examples:**
+```toml
+# Show all sections
+[widgets]
+hideWidgets = []
+
+# Hide Altmetric section
+[widgets]
+hideWidgets = ["Altmetric_Attention"]
+
+# Hide multiple sections to focus on geographic analysis
+[widgets]
+hideWidgets = ["Research_Domain_Analysis", "Altmetric_Attention", "Notable_Citations"]
+```
+
+### Customize Theme Colors
+
+Modify the `[theme]` section to customize your color scheme. Here are the default colors:
+
+```toml
+[theme]
+primaryColor = "#cb785c"              # Main accent color
+backgroundColor = "#fdfdf8"            # Main background
+secondaryBackgroundColor = "#ecebe3"   # Secondary background (sidebars, containers)
+textColor = "#3d3a2a"                  # Primary text color
+linkColor = "#3d3a2a"                  # Link color
+borderColor = "#d3d2ca"                # Border/divider color
+codeBackgroundColor = "#ecebe4"        # Code block background
+```
+
+### Customize Fonts and Text Sizes
+
+The generated project includes custom fonts (SpaceGrotesk and SpaceMono) in the `static/` folder. Here are the default settings:
+
+```toml
+[theme]
+font = "SpaceGrotesk"                  # Default font family
+codeFont = "SpaceMono"                 # Code block font
+codeFontSize = ".75rem"                # Code text size
+headingFontSizes = ["3rem", "2rem"]    # H1 and H2 sizes
+headingFontWeights = [600,500,500,500,500,500]  # Font weights for headings
+```
+
+### Customize Layout and Styling
+
+```toml
+[theme]
+showWidgetBorder = true                # Show borders around widgets
+showSidebarBorder = true               # Show sidebar border
+baseRadius = "0.75rem"                 # Corner radius for elements
+buttonRadius = "full"                  # Button border radius ("full" = pill-shaped)
+chartCategoricalColors = ["#0ea5e9", "#059669", "#fbbf24"]  # Chart colors
+```
+
+### Customize Sidebar
+
+```toml
+[theme.sidebar]
+backgroundColor = "#f0f0ec"            # Sidebar background
+secondaryBackgroundColor = "#ecebe3"   # Secondary sidebar background
+headingFontSizes = ["1.6rem", "1.4rem", "1.2rem"]  # Heading sizes in sidebar
+dataframeHeaderBackgroundColor = "#e4e4e0"  # Table header background
+```
 
 ## Citation
 
