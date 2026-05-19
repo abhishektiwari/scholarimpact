@@ -178,7 +178,8 @@ services:
     environment:
       - ENV=production
       # Widget visibility configuration (see .env for available widgets)
-      - SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
+      # Uncomment and set to hide specific widgets in the dashboard
+      #- SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
     restart: unless-stopped
     deploy:
       replicas: 1
