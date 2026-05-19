@@ -53,15 +53,14 @@ class WidgetConfig:
                                 hide_list = config["widgets"]["hideWidgets"]
                                 if isinstance(hide_list, list):
                                     hidden_widgets = set(hide_list)
-                                    print(f"✓ Loaded hidden widgets from {config_path.resolve()}: {hidden_widgets}")
                         break
                     except Exception as file_err:
-                        print(f"Error reading {config_path}: {file_err}")
+                        pass
         except Exception as e:
-            print(f"Warning: Could not load widget config: {e}")
+            pass
 
         if not hidden_widgets:
-            print("No hidden widgets configured (all sections will be shown)")
+            pass
 
         WidgetConfig._hidden_widgets_cache = hidden_widgets
         return hidden_widgets
