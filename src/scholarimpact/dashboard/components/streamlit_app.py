@@ -632,13 +632,11 @@ class StreamlitAppComponent(BaseComponent):
                     if st.button("← Prev", width="stretch", key="citations_prev"):
                         if st.session_state.citations_page > 1:
                             st.session_state.citations_page -= 1
-                            st.rerun()
 
                 with nav_col2:
                     if st.button("Next →", width="stretch", key="citations_next"):
                         if st.session_state.citations_page < total_pages:
                             st.session_state.citations_page += 1
-                            st.rerun()
 
                 # Calculate start and end indices for current page
                 start_idx = (st.session_state.citations_page - 1) * st.session_state.citations_per_page
@@ -792,13 +790,11 @@ class StreamlitAppComponent(BaseComponent):
             if st.button("← Prev", width="stretch", key="institutions_prev"):
                 if st.session_state.institutions_page > 1:
                     st.session_state.institutions_page -= 1
-                    st.rerun()
 
         with nav_col2:
             if st.button("Next →", width="stretch", key="institutions_next"):
                 if st.session_state.institutions_page < total_pages:
                     st.session_state.institutions_page += 1
-                    st.rerun()
 
         # Calculate start and end indices for current page
         start_idx = (st.session_state.institutions_page - 1) * st.session_state.institutions_per_page
@@ -961,13 +957,11 @@ class StreamlitAppComponent(BaseComponent):
             if st.button("← Prev", width="stretch", key="notable_citations_prev"):
                 if st.session_state.notable_citations_page > 1:
                     st.session_state.notable_citations_page -= 1
-                    st.rerun()
 
         with nav_col2:
             if st.button("Next →", width="stretch", key="notable_citations_next"):
                 if st.session_state.notable_citations_page < total_pages:
                     st.session_state.notable_citations_page += 1
-                    st.rerun()
 
         # Calculate start and end indices for current page
         start_idx = (st.session_state.notable_citations_page - 1) * st.session_state.notable_citations_per_page
