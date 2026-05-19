@@ -74,6 +74,20 @@ gatherUsageStats = false
             f.write(config_content)
         click.echo(f" Generated fallback Streamlit config: {config_file}")
 
+    # Copy bundled secrets configuration
+    secrets_copied = copy_streamlit_config(str(streamlit_dir), "streamlit/secrets.toml")
+    if secrets_copied:
+        click.echo(f" Copied bundled Streamlit secrets: {streamlit_dir / 'secrets.toml'}")
+    else:
+        # Fallback: create basic secrets file
+        secrets_content = """# ScholarImpact Widget Configuration
+SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention"
+"""
+        secrets_file = streamlit_dir / "secrets.toml"
+        with open(secrets_file, "w", encoding="utf-8") as f:
+            f.write(secrets_content)
+        click.echo(f" Generated fallback secrets file: {secrets_file}")
+
     # Copy bundled fonts
     fonts_copied = copy_fonts(str(streamlit_dir))
     if fonts_copied > 0:
@@ -106,32 +120,6 @@ For custom fonts, use the font family name after placing files here.
         f.write(requirements_content)
 
     click.echo(f" Generated requirements.txt for deployment: {requirements_file}")
-
-    # Generate .env file for widget configuration
-    env_content = """# ScholarImpact Dashboard Configuration
-# Widget visibility control (comma-separated list of widgets to hide)
-SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
-
-# Available widgets to hide:
-# - Altmetric_Attention
-# - Top_Citing_Countries
-# - Citation_Distribution_by_Country
-# - Citations_Distribution_by_Year
-# - Research_Domain_Analysis
-# - Interdisciplinary_Impact_Metrics
-# - Top_Citing_Institutions
-# - Notable_Citations
-# - Detailed_Citations_Table
-
-# Example: Hide multiple widgets
-# SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention,Top_Citing_Countries,Research_Domain_Analysis
-"""
-
-    env_file = output_path / ".env"
-    with open(env_file, "w", encoding="utf-8") as f:
-        f.write(env_content)
-
-    click.echo(f" Generated .env configuration file: {env_file}")
 
     # Generate Dockerfile for containerization
     dockerfile_content = """# app/Dockerfile
