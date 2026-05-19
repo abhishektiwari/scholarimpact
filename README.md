@@ -693,16 +693,45 @@ The generated project is ready for deployment to:
 
 ## Customize Your Dashboard
 
-Customize your dashboard's appearance and content by editing `.streamlit/config.toml`. All changes take effect when you refresh the dashboard - no restart needed!
+Customize your dashboard's appearance and content. All changes take effect when you refresh the dashboard - no restart needed!
 
 ### Hide/Show Dashboard Sections (Widgets)
 
-Control which analysis sections appear on your dashboard using the `[widgets]` section:
+Control which analysis sections appear on your dashboard using the `.env` file. When you generate a dashboard with `scholarimpact generate-dashboard`, a `.env` file is created automatically.
 
-```toml
-[widgets]
-# Hide specific sections using snake_case names
-hideWidgets = ["Altmetric_Attention"]
+**Method 1: Using `.env` File (Recommended for Local & Cloud)**
+
+Edit the `.env` file in your project directory:
+
+```bash
+# .env file (same directory as app.py)
+SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention,Top_Citing_Countries
+```
+
+**Method 2: Using Environment Variables (Docker & Cloud)**
+
+Set the environment variable directly:
+
+```bash
+# In terminal/shell
+export SCHOLARIMPACT_HIDE_WIDGETS="Altmetric_Attention,Top_Citing_Countries"
+streamlit run app.py
+```
+
+**Method 3: Using docker-compose.yml (Docker Deployment)**
+
+```yaml
+services:
+  scholarimpact:
+    environment:
+      SCHOLARIMPACT_HIDE_WIDGETS: "Altmetric_Attention,Top_Citing_Countries"
+```
+
+**Method 4: Using Streamlit Cloud Secrets**
+
+In your Streamlit Cloud app settings, add to "Secrets":
+```
+SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
 ```
 
 **Available Widget Names:**
@@ -717,18 +746,18 @@ hideWidgets = ["Altmetric_Attention"]
 - `Detailed_Citations_Table` - Complete paginated table of all citing papers
 
 **Examples:**
-```toml
-# Show all sections
-[widgets]
-hideWidgets = []
+```bash
+# Show all sections (empty value)
+SCHOLARIMPACT_HIDE_WIDGETS=
 
-# Hide Altmetric section
-[widgets]
-hideWidgets = ["Altmetric_Attention"]
+# Hide Altmetric section only
+SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
 
-# Hide multiple sections to focus on geographic analysis
-[widgets]
-hideWidgets = ["Research_Domain_Analysis", "Altmetric_Attention", "Notable_Citations"]
+# Hide multiple sections
+SCHOLARIMPACT_HIDE_WIDGETS=Research_Domain_Analysis,Altmetric_Attention,Notable_Citations
+
+# Hide many sections to focus on geographic analysis
+SCHOLARIMPACT_HIDE_WIDGETS=Research_Domain_Analysis,Altmetric_Attention,Notable_Citations,Top_Citing_Institutions,Detailed_Citations_Table
 ```
 
 ### Customize Theme Colors

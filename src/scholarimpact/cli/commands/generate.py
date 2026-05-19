@@ -107,6 +107,32 @@ For custom fonts, use the font family name after placing files here.
 
     click.echo(f" Generated requirements.txt for deployment: {requirements_file}")
 
+    # Generate .env file for widget configuration
+    env_content = """# ScholarImpact Dashboard Configuration
+# Widget visibility control (comma-separated list of widgets to hide)
+SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
+
+# Available widgets to hide:
+# - Altmetric_Attention
+# - Top_Citing_Countries
+# - Citation_Distribution_by_Country
+# - Citations_Distribution_by_Year
+# - Research_Domain_Analysis
+# - Interdisciplinary_Impact_Metrics
+# - Top_Citing_Institutions
+# - Notable_Citations
+# - Detailed_Citations_Table
+
+# Example: Hide multiple widgets
+# SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention,Top_Citing_Countries,Research_Domain_Analysis
+"""
+
+    env_file = output_path / ".env"
+    with open(env_file, "w", encoding="utf-8") as f:
+        f.write(env_content)
+
+    click.echo(f" Generated .env configuration file: {env_file}")
+
     # Generate Dockerfile for containerization
     dockerfile_content = """# app/Dockerfile
 FROM python:3.13-slim
@@ -151,6 +177,9 @@ services:
     image: scholarimpact-dashboard:latest
     environment:
       - ENV=production
+      # Widget visibility configuration (see .env for available widgets)
+      # Uncomment and set to hide specific widgets in the dashboard
+      #- SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention
     restart: unless-stopped
     deploy:
       replicas: 1
