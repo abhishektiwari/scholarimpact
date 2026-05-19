@@ -768,8 +768,45 @@ class StreamlitAppComponent(BaseComponent):
                 help="Percentage of citations from top 1000 Scimago-ranked Institutions",
             )
 
-        # Display as dataframe (Institution only)
-        df = pd.DataFrame(table_data)[["Institution"]]
+        # Pagination for institutions table
+        if "institutions_page" not in st.session_state:
+            st.session_state.institutions_page = 1
+        if "institutions_per_page" not in st.session_state:
+            st.session_state.institutions_per_page = 10
+
+        total_records = len(table_data)
+        total_pages = (total_records + st.session_state.institutions_per_page - 1) // st.session_state.institutions_per_page
+
+        # Rows per page selector on top
+        st.session_state.institutions_per_page = st.selectbox(
+            "Rows per page:",
+            options=[10, 25, 50, 100],
+            index=0,
+            key="institutions_rows_select"
+        )
+
+        # Navigation buttons below
+        nav_col1, nav_col2 = st.columns([1, 1])
+
+        with nav_col1:
+            if st.button("← Prev", use_container_width=True, key="institutions_prev"):
+                if st.session_state.institutions_page > 1:
+                    st.session_state.institutions_page -= 1
+                    st.rerun()
+
+        with nav_col2:
+            if st.button("Next →", use_container_width=True, key="institutions_next"):
+                if st.session_state.institutions_page < total_pages:
+                    st.session_state.institutions_page += 1
+                    st.rerun()
+
+        # Calculate start and end indices for current page
+        start_idx = (st.session_state.institutions_page - 1) * st.session_state.institutions_per_page
+        end_idx = min(start_idx + st.session_state.institutions_per_page, total_records)
+
+        # Display paginated dataframe
+        paginated_data = table_data[start_idx:end_idx]
+        df = pd.DataFrame(paginated_data)[["Institution"]]
         st.dataframe(
             df,
             use_container_width=True,
@@ -779,7 +816,7 @@ class StreamlitAppComponent(BaseComponent):
             },
         )
 
-        st.caption(f"Showing {len(table_data)} institutions citing this work ranked in Scimago research ranking.")
+        st.info(f"Showing rows {start_idx + 1}–{end_idx} of {total_records} Scimago-ranked institutions")
 
     def _render_notable_citations(self, pub_data: pd.Series, data_dir: str):
         """Render table of top 10% citing articles by citation count."""
@@ -900,8 +937,45 @@ class StreamlitAppComponent(BaseComponent):
                 "Citations": f"{citation['citations']:,}"
             })
 
-        # Display as dataframe
-        df = pd.DataFrame(table_data)
+        # Pagination for notable citations table
+        if "notable_citations_page" not in st.session_state:
+            st.session_state.notable_citations_page = 1
+        if "notable_citations_per_page" not in st.session_state:
+            st.session_state.notable_citations_per_page = 10
+
+        total_records = len(table_data)
+        total_pages = (total_records + st.session_state.notable_citations_per_page - 1) // st.session_state.notable_citations_per_page
+
+        # Rows per page selector on top
+        st.session_state.notable_citations_per_page = st.selectbox(
+            "Rows per page:",
+            options=[10, 25, 50, 100],
+            index=0,
+            key="notable_citations_rows_select"
+        )
+
+        # Navigation buttons below
+        nav_col1, nav_col2 = st.columns([1, 1])
+
+        with nav_col1:
+            if st.button("← Prev", use_container_width=True, key="notable_citations_prev"):
+                if st.session_state.notable_citations_page > 1:
+                    st.session_state.notable_citations_page -= 1
+                    st.rerun()
+
+        with nav_col2:
+            if st.button("Next →", use_container_width=True, key="notable_citations_next"):
+                if st.session_state.notable_citations_page < total_pages:
+                    st.session_state.notable_citations_page += 1
+                    st.rerun()
+
+        # Calculate start and end indices for current page
+        start_idx = (st.session_state.notable_citations_page - 1) * st.session_state.notable_citations_per_page
+        end_idx = min(start_idx + st.session_state.notable_citations_per_page, total_records)
+
+        # Display paginated dataframe
+        paginated_data = table_data[start_idx:end_idx]
+        df = pd.DataFrame(paginated_data)
         st.dataframe(
             df,
             use_container_width=True,
@@ -915,7 +989,7 @@ class StreamlitAppComponent(BaseComponent):
             },
         )
 
-        st.caption(f"Showing {len(notable_citations)} papers in top 10% (90th percentile: {percentile_90:.0f} citations)")
+        st.info(f"Showing rows {start_idx + 1}–{end_idx} of {total_records} papers in top 10% (90th percentile: {percentile_90:.0f} citations)")
 
     def _generate_insight(self, pub_data: pd.Series) -> str:
         """Generate human-readable insight exactly as in original."""
