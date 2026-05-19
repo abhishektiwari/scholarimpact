@@ -629,13 +629,13 @@ class StreamlitAppComponent(BaseComponent):
                 nav_col1, nav_col2= st.columns([1, 1])
 
                 with nav_col1:
-                    if st.button("← Prev", use_container_width=True, key="citations_prev"):
+                    if st.button("← Prev", width="stretch", key="citations_prev"):
                         if st.session_state.citations_page > 1:
                             st.session_state.citations_page -= 1
                             st.rerun()
 
                 with nav_col2:
-                    if st.button("Next →", use_container_width=True, key="citations_next"):
+                    if st.button("Next →", width="stretch", key="citations_next"):
                         if st.session_state.citations_page < total_pages:
                             st.session_state.citations_page += 1
                             st.rerun()
@@ -649,7 +649,7 @@ class StreamlitAppComponent(BaseComponent):
 
                 st.dataframe(
                     paginated_df,
-                    use_container_width=True,
+                    width="stretch",
                     hide_index=True,
                     column_config={
                         "Paper Title": st.column_config.TextColumn("Citing Paper", width="large"),
@@ -789,13 +789,13 @@ class StreamlitAppComponent(BaseComponent):
         nav_col1, nav_col2 = st.columns([1, 1])
 
         with nav_col1:
-            if st.button("← Prev", use_container_width=True, key="institutions_prev"):
+            if st.button("← Prev", width="stretch", key="institutions_prev"):
                 if st.session_state.institutions_page > 1:
                     st.session_state.institutions_page -= 1
                     st.rerun()
 
         with nav_col2:
-            if st.button("Next →", use_container_width=True, key="institutions_next"):
+            if st.button("Next →", width="stretch", key="institutions_next"):
                 if st.session_state.institutions_page < total_pages:
                     st.session_state.institutions_page += 1
                     st.rerun()
@@ -809,7 +809,7 @@ class StreamlitAppComponent(BaseComponent):
         df = pd.DataFrame(paginated_data)[["Institution"]]
         st.dataframe(
             df,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Institution": st.column_config.TextColumn("Institution", width="large"),
@@ -958,13 +958,13 @@ class StreamlitAppComponent(BaseComponent):
         nav_col1, nav_col2 = st.columns([1, 1])
 
         with nav_col1:
-            if st.button("← Prev", use_container_width=True, key="notable_citations_prev"):
+            if st.button("← Prev", width="stretch", key="notable_citations_prev"):
                 if st.session_state.notable_citations_page > 1:
                     st.session_state.notable_citations_page -= 1
                     st.rerun()
 
         with nav_col2:
-            if st.button("Next →", use_container_width=True, key="notable_citations_next"):
+            if st.button("Next →", width="stretch", key="notable_citations_next"):
                 if st.session_state.notable_citations_page < total_pages:
                     st.session_state.notable_citations_page += 1
                     st.rerun()
@@ -978,7 +978,7 @@ class StreamlitAppComponent(BaseComponent):
         df = pd.DataFrame(paginated_data)
         st.dataframe(
             df,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Paper Title": st.column_config.TextColumn("Citing Paper", width="large"),
@@ -1217,7 +1217,7 @@ class StreamlitAppComponent(BaseComponent):
                 showlegend=False,
             )
 
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
             st.caption(f"Citations based on available country of authors. Top {len(countries)} countries.")
 
         # Citation Locations - World Map
@@ -1313,7 +1313,7 @@ class StreamlitAppComponent(BaseComponent):
                         "dragPan": True,
                     }
 
-                    st.plotly_chart(fig, use_container_width=True, config=config)
+                    st.plotly_chart(fig, width="stretch", config=config)
 
                     # Summary statistics
                     total_countries = len(country_data)
@@ -1356,7 +1356,7 @@ class StreamlitAppComponent(BaseComponent):
                     ),
                 )
 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
 
                 # Summary statistics for citations per year
                 total_with_years = sum(counts)
@@ -1408,7 +1408,7 @@ class StreamlitAppComponent(BaseComponent):
                         ),
                     )
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
 
                     # Domain summary statistics
                     total_with_domains = sum(domains.values())
@@ -1455,7 +1455,7 @@ class StreamlitAppComponent(BaseComponent):
                         margin=dict(l=200),
                     )
 
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
 
                     # Field diversity metric
                     total_fields = len(fields)
@@ -1496,7 +1496,7 @@ class StreamlitAppComponent(BaseComponent):
                             margin=dict(t=50, l=0, r=0, b=0),
                         )
 
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
 
                         # Subfield statistics
                         total_subfields = len(subfields)

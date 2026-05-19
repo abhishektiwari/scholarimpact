@@ -1,40 +1,24 @@
 """
 Widget configuration and visibility management for the dashboard.
-Handles reading config from .env file and environment variables.
+Handles reading config from .streamlit/secrets.toml
 """
 
-import os
-from pathlib import Path
 from typing import Optional, Set
 
-# Load .env file from app directory (same location as app.py)
-try:
-    from dotenv import load_dotenv
-    env_paths = [
-        Path(".env"),
-        Path(".") / ".env",
-        Path(__file__).parent.parent.parent / ".env",
-    ]
-    for env_path in env_paths:
-        if env_path.exists():
-            load_dotenv(env_path)
-            break
-except ImportError:
-    # python-dotenv not available, will use os.environ directly
-    pass
+import streamlit as st
 
 
 class WidgetConfig:
-    """Manages widget visibility based on configuration."""
+    """Manages widget visibility based on Streamlit secrets configuration."""
 
     _hidden_widgets_cache: Optional[Set[str]] = None
 
     @staticmethod
     def get_hidden_widgets() -> Set[str]:
-        """Load hidden widgets from environment variables (.env file).
+        """Load hidden widgets from Streamlit secrets.
 
-        Configuration in .env file (same directory as app.py):
-        SCHOLARIMPACT_HIDE_WIDGETS=Altmetric_Attention,Top_Citing_Countries
+        Configuration in .streamlit/secrets.toml:
+        SCHOLARIMPACT_HIDE_WIDGETS = "Altmetric_Attention,Top_Citing_Countries"
 
         Returns:
             Set of widget names that should be hidden
@@ -44,9 +28,8 @@ class WidgetConfig:
 
         hidden_widgets = set()
 
-        # Read from SCHOLARIMPACT_HIDE_WIDGETS environment variable
-        # This can be set in .env file or as system environment variable
-        env_hidden = os.environ.get("SCHOLARIMPACT_HIDE_WIDGETS", "").strip()
+        # Read from Streamlit secrets (stored in .streamlit/secrets.toml)
+        env_hidden = st.secrets["SCHOLARIMPACT_HIDE_WIDGETS"]
         if env_hidden:
             # Parse comma-separated widget names
             hidden_widgets = set(w.strip() for w in env_hidden.split(",") if w.strip())
